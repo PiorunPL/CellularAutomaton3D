@@ -33,6 +33,6 @@
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\..\MainProject\MainProject.csproj" />
+      <ProjectReference Include="..\..\VirtualCamera\VirtualCamera.csproj" />
     </ItemGroup>
 </Project>

@@ -10,39 +10,31 @@ namespace MainProject.Controller;
 
 public class Controller
 {
-    private readonly WorldTriangles _world = new();
+    // private readonly WorldTriangles _world = new();
+    private readonly WorldCellularAutomaton _world = new(20,20,20);
     private readonly Camera _camera = new Camera();
     private readonly List<Matrix4x4> _matrices = new List<Matrix4x4>();
     private readonly BSPTreeBuilder _bspTreeBuilder = new BSPTreeBuilder();
+    private readonly int _numberOfChunks = 50;
     private Node _BSPTreeRoot;
 
     public Controller()
     {
-        _world.SetUpBasicWorld();
-        Console.WriteLine("before get best bsp: " + _world.Triangles.Count);
-        Node? tempNode = _bspTreeBuilder.GetBestBSPTree(_world.Triangles, 100);
-        // Console.WriteLine(tempNode.GetMaxDepth());s
-        // Console.WriteLine("bsp tree: " + tempNode);
-        // Console.WriteLine("bsp tree Back node: " + tempNode.Back);
-        // Console.WriteLine("bsp tree Front node: " + tempNode.Front);
+        Node? tempNode = _bspTreeBuilder.GetBestBSPTree(_world.Triangles, 5);
         
-        // Node.TraverseAndWriteOutput(tempNode);
         if (tempNode == null)
             throw new ApplicationException();
         _BSPTreeRoot = tempNode;
         
         //Update world, after dividing triangles
         //Important! First Add new Triangles, then remove old ones
-        Console.WriteLine("before add range: " + _world.Triangles.Count);
         _world.Triangles.AddRange(_bspTreeBuilder.newTrianglesToWorld);
-        Console.WriteLine("after add range: " + _world.Triangles.Count);
         _world.Points.AddRange(_bspTreeBuilder.newPointToWorld);
         foreach (var triangle in _bspTreeBuilder.trianglesToRemoveFromWorld)
         {
             _world.Triangles.Remove(triangle);
         }
-        Console.WriteLine("after remove: " + _world.Triangles.Count);
-        
+
     }
     
     public SKBitmap CreatePhoto()
@@ -56,25 +48,26 @@ public class Controller
             }
             
             List<Point> points = _world.Points;
-            foreach (var point in points)
+            
+            var chunks =  points.Chunk(points.Count / _numberOfChunks + 1);
+            var pointsEnumerable = chunks.ToList();
+            
+            Task[] tasks = new Task[pointsEnumerable.Count];
+            
+            for (int i = 0; i < pointsEnumerable.Count; i++)
             {
-                var vector = point.GetVector();
-
-                var newVector = Matrix4x4.Multiply(resultMatrix, vector);
-            
-                point.LoadCoordinatesFromVector(newVector);
+                var i1 = i;
+                tasks[i] = Task.Run((() => calculateNewPoints(pointsEnumerable[i1], resultMatrix)));
             }
-            
+
+            Task.WaitAll(tasks);
+
             _matrices.Clear();
         }
         
-        //TODO: Order Triangles
         PainingAlgorithOrder PAO = new PainingAlgorithOrder();
         PAO.CreateTrianglesOrder(_BSPTreeRoot);
-        Console.WriteLine("before size: " + _world.Triangles.Count);
-        Console.WriteLine("order size: " + PAO.Order.Count);
         var orderedTriangles = PAO.Order;
-        // _world.Triangles.Reverse();
 
         var chosenTriangles = TrianglesChooser.ChooseOnlyTrianglesAhead(orderedTriangles);
         
@@ -82,6 +75,16 @@ public class Controller
         var result = _camera.CreatePhotoTriangles();
 
         return result;
+    }
+
+    public void calculateNewPoints(Point[] points, Matrix4x4 resultMatrix)
+    {
+        foreach (var point in points)
+        {
+            var vector = point.GetVector();
+            var newVector = Matrix4x4.Multiply(resultMatrix, vector);
+            point.LoadCoordinatesFromVector(newVector);
+        }
     }
 
     public void ZoomIn(double t)

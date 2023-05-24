@@ -60,6 +60,9 @@ public class BitmapUtil
         
         foreach (var triangle in triangles)
         {
+            if(!triangle.isVisible)
+                continue;
+            
             var normal = triangle.GetNormalVector();
             var normalisedNormal = triangle.GetNormalisedNormalVector();
             // Console.WriteLine(normalisedNormal);

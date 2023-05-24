@@ -12,7 +12,7 @@ public class PainingAlgorithOrder
         {
             return;
         }
-        Console.WriteLine("CreateTrianglesOrder size of bsptree " + BSPTree.Triangles.Count);
+        // Console.WriteLine("CreateTrianglesOrder size of bsptree " + BSPTree.Triangles.Count);
         Triangle t = BSPTree.Plane;
         double position = t.CheckPointPosition(new Point3D(0, 0, 0));
         if(position < 0)
@@ -22,7 +22,8 @@ public class PainingAlgorithOrder
             {
                 foreach(Triangle tt in BSPTree.Triangles)
                 {
-                    Order.Add(tt);
+                    if(tt.isVisible)
+                        Order.Add(tt);
                     // Console.WriteLine(tt);
                 }
             }
@@ -35,7 +36,8 @@ public class PainingAlgorithOrder
             {
                 foreach(Triangle tt in BSPTree.Triangles)
                 {
-                    Order.Add(tt);
+                    if(tt.isVisible)
+                        Order.Add(tt);
                     // Console.WriteLine(tt);
                 }
             }
