@@ -64,8 +64,6 @@ public class WorldCellularAutomaton
             }
         }
 
-        Random rnd = new Random();
-
         for (int i = 0; i < sizeX; i++)
         {
             for (int j = 0; j < sizeY; j++)
@@ -88,6 +86,108 @@ public class WorldCellularAutomaton
                 }
             }
         }
+    }
+
+    public void IterateWorld()
+    {
+        int[,,] tmpMap = new int[sizeX, sizeY, sizeZ];
+
+        for (int x = 0; x < sizeX; x++)
+        {
+            for (int y = 0; y < sizeY; y++)
+            {
+                for (int z = 0; z < sizeZ; z++)
+                {
+                    IterateCube(tmpMap, x, y, z);
+                }
+            }
+        }
+        for (int x = 0; x < sizeX; x++)
+        {
+            for (int y = 0; y < sizeY; y++)
+            {
+                for (int z = 0; z < sizeZ; z++)
+                {
+                    if (tmpMap[x, y, z] == 1)
+                    {
+                        mapOfAutomaton[x, y, z].MakeVisible();
+                    }
+                    else
+                    {
+                        mapOfAutomaton[x, y, z].MakeInvisible();
+                    }
+                }
+            }
+        }
+    }
+
+    private void IterateCube(int[,,] tmpMap, int x, int y, int z)
+    {
+        int neighboursCount = CountNeighbours(x, y, z, Neighbourhood.Moore);
+
+        if (neighboursCount == 1)
+        {
+            tmpMap[x, y, z] = 1;
+        }
+        else
+        {
+            tmpMap[x, y, z] = 0;
+        }
+    }
+
+    private int CountNeighbours(int x, int y, int z, Neighbourhood n)
+    {
+        int neighboursCount = 0;
+
+        if (x > 0 && mapOfAutomaton[x - 1, y, z].IsVisible())
+            neighboursCount++;
+        if (x < sizeX - 1 && mapOfAutomaton[x + 1, y, z].IsVisible())
+            neighboursCount++;
+        if (y > 0 && mapOfAutomaton[x, y - 1, z].IsVisible())
+            neighboursCount++;
+        if (y < sizeY - 1 && mapOfAutomaton[x, y + 1, z].IsVisible())
+            neighboursCount++;
+        if (z > 0 && mapOfAutomaton[x, y, z - 1].IsVisible())
+            neighboursCount++;
+        if (z < sizeZ - 1 && mapOfAutomaton[x, y, z + 1].IsVisible())
+            neighboursCount++;
+
+        if (n == Neighbourhood.Moore)
+        {
+            if (x > 0 && y > 0 && mapOfAutomaton[x - 1, y - 1, z].IsVisible())
+                neighboursCount++;
+            if (x > 0 && y < sizeY - 1 && mapOfAutomaton[x - 1, y + 1, z].IsVisible())
+                neighboursCount++;
+            if (x > 0 && z > 0 && mapOfAutomaton[x - 1, y, z - 1].IsVisible())
+                neighboursCount++;
+            if (x > 0 && z < sizeZ - 1 && mapOfAutomaton[x - 1, y, z + 1].IsVisible())
+                neighboursCount++;
+
+            if (x < sizeX - 1 && y > 0 && mapOfAutomaton[x + 1, y - 1, z].IsVisible())
+                neighboursCount++;
+            if (x < sizeX - 1 && y < sizeY - 1 && mapOfAutomaton[x + 1, y + 1, z].IsVisible())
+                neighboursCount++;
+            if (x < sizeX - 1 && z > 0 && mapOfAutomaton[x + 1, y, z - 1].IsVisible())
+                neighboursCount++;
+            if (x < sizeX - 1 && z < sizeZ - 1 && mapOfAutomaton[x + 1, y, z + 1].IsVisible())
+                neighboursCount++;
+
+            if (y > 0 && z > 0 && mapOfAutomaton[x, y - 1, z - 1].IsVisible())
+                neighboursCount++;
+            if (y > 0 && z < sizeZ - 1 && mapOfAutomaton[x, y - 1, z + 1].IsVisible())
+                neighboursCount++;
+            if (y < sizeY - 1 && z > 0 && mapOfAutomaton[x, y + 1, z - 1].IsVisible())
+                neighboursCount++;
+            if (y < sizeY - 1 && z < sizeZ - 1 && mapOfAutomaton[x, y + 1, z + 1].IsVisible())
+                neighboursCount++;
+        }
+        return neighboursCount;
+    }
+
+    private enum Neighbourhood
+    {
+        Moore,
+        VonNeumann
     }
 
     public void InitializeStartMap(int[,,] map)

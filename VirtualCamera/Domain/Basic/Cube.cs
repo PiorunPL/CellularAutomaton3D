@@ -7,9 +7,9 @@ public class Cube
 
     public void MakeVisible()
     {
-        if(_isVisible)
+        if (_isVisible)
             return;
-        
+
         _isVisible = true;
         foreach (var triangle in Triangles)
         {
@@ -19,7 +19,7 @@ public class Cube
 
     public void MakeInvisible()
     {
-        if(!_isVisible)
+        if (!_isVisible)
             return;
 
         _isVisible = false;
@@ -29,4 +29,8 @@ public class Cube
         }
     }
 
+    public bool IsVisible()
+    {
+        return _isVisible;
+    }
 }

@@ -11,21 +11,22 @@ namespace MainProject.Controller;
 public class Controller
 {
     // private readonly WorldTriangles _world = new();
-    private readonly WorldCellularAutomaton _world = new(20,20,20);
+    private readonly WorldCellularAutomaton _world = new(20, 20, 20);
     private readonly Camera _camera = new Camera();
     private readonly List<Matrix4x4> _matrices = new List<Matrix4x4>();
     private readonly BSPTreeBuilder _bspTreeBuilder = new BSPTreeBuilder();
     private readonly int _numberOfChunks = 50;
     private Node _BSPTreeRoot;
+    private int _iterationTimeoout = 60;
 
     public Controller()
     {
         Node? tempNode = _bspTreeBuilder.GetBestBSPTree(_world.Triangles, 5);
-        
+
         if (tempNode == null)
             throw new ApplicationException();
         _BSPTreeRoot = tempNode;
-        
+
         //Update world, after dividing triangles
         //Important! First Add new Triangles, then remove old ones
         _world.Triangles.AddRange(_bspTreeBuilder.NewTrianglesToWorld);
@@ -34,26 +35,25 @@ public class Controller
         {
             _world.Triangles.Remove(triangle);
         }
-
     }
-    
+
     public SKBitmap CreatePhoto()
     {
         if (_matrices.Count != 0)
         {
             Matrix4x4 resultMatrix = _matrices[0];
             for (int i = 1; i < _matrices.Count; i++)
-            { 
+            {
                 resultMatrix = Matrix4x4.Multiply(resultMatrix, _matrices[i]);
             }
-            
+
             List<Point> points = _world.Points;
-            
-            var chunks =  points.Chunk(points.Count / _numberOfChunks + 1);
+
+            var chunks = points.Chunk(points.Count / _numberOfChunks + 1);
             var pointsEnumerable = chunks.ToList();
-            
+
             Task[] tasks = new Task[pointsEnumerable.Count];
-            
+
             for (int i = 0; i < pointsEnumerable.Count; i++)
             {
                 var i1 = i;
@@ -64,16 +64,21 @@ public class Controller
 
             _matrices.Clear();
         }
-        
+
         PainingAlgorithOrder PAO = new PainingAlgorithOrder();
         PAO.CreateTrianglesOrder(_BSPTreeRoot);
         var orderedTriangles = PAO.Order;
 
         var chosenTriangles = TrianglesChooser.ChooseOnlyTrianglesAhead(orderedTriangles);
-        
+
         _camera.PassActualWorld(chosenTriangles);
         var result = _camera.CreatePhotoTriangles();
-
+        _iterationTimeoout--;
+        if (_iterationTimeoout <= 0)
+        {
+            _iterationTimeoout = 30;
+            _world.IterateWorld();
+        }
         return result;
     }
 
@@ -92,7 +97,6 @@ public class Controller
         Console.WriteLine($"Before Zoom In: {_camera.ViewPort.Z} with t = {t}");
         _camera.ViewPort.Z += t;
         Console.WriteLine($"After Zoom In: {_camera.ViewPort.Z}");
-       
     }
 
     public void ZoomOut(double t)
@@ -118,7 +122,7 @@ public class Controller
 
     public void GoLeft(double t)
     {
-        var matrix = Translation((float)t,0 , 0);
+        var matrix = Translation((float)t, 0, 0);
         _matrices.Insert(0, matrix);
     }
 
@@ -130,13 +134,13 @@ public class Controller
 
     public void GoDown(double t)
     {
-        var matrix = Translation(0, (float)t,0 );
+        var matrix = Translation(0, (float)t, 0);
         _matrices.Insert(0, matrix);
     }
 
     public void GoUp(double t)
     {
-        var matrix = Translation(0, (float)-t,0);
+        var matrix = Translation(0, (float)-t, 0);
         _matrices.Insert(0, matrix);
     }
 
@@ -144,12 +148,24 @@ public class Controller
     {
         Matrix4x4 matrix = new Matrix4x4
         {
-            V00 = (float)Math.Cos(t), V01 = 0, V02 = (float)Math.Sin(t), V03 = 0,
-            V10 = 0, V11 = 1, V12 = 0, V13 = 0,
-            V20 = (float)(-1*Math.Sin(t)), V21 = 0, V22 = (float)Math.Cos(t), V23 = 0,
-            V30 = 0, V31 = 0, V32 = 0, V33 = 1
+            V00 = (float)Math.Cos(t),
+            V01 = 0,
+            V02 = (float)Math.Sin(t),
+            V03 = 0,
+            V10 = 0,
+            V11 = 1,
+            V12 = 0,
+            V13 = 0,
+            V20 = (float)(-1 * Math.Sin(t)),
+            V21 = 0,
+            V22 = (float)Math.Cos(t),
+            V23 = 0,
+            V30 = 0,
+            V31 = 0,
+            V32 = 0,
+            V33 = 1
         };
-        
+
         _matrices.Insert(0, matrix);
     }
 
@@ -162,25 +178,49 @@ public class Controller
     {
         Matrix4x4 matrix = new Matrix4x4
         {
-            V00 = 1, V01 = 0, V02 = 0, V03 = 0,
-            V10 = 0, V11 = (float)Math.Cos(t), V12 = (float)(-1 * Math.Sin(t)), V13 = 0,
-            V20 = 0, V21 = (float)Math.Sin(t), V22 = (float)Math.Cos(t), V23 = 0,
-            V30 = 0, V31 = 0, V32 = 0, V33 = 1
+            V00 = 1,
+            V01 = 0,
+            V02 = 0,
+            V03 = 0,
+            V10 = 0,
+            V11 = (float)Math.Cos(t),
+            V12 = (float)(-1 * Math.Sin(t)),
+            V13 = 0,
+            V20 = 0,
+            V21 = (float)Math.Sin(t),
+            V22 = (float)Math.Cos(t),
+            V23 = 0,
+            V30 = 0,
+            V31 = 0,
+            V32 = 0,
+            V33 = 1
         };
-        
+
         _matrices.Insert(0, matrix);
     }
 
     public void TurnDown(double t)
     {
         t = -t;
-        
+
         Matrix4x4 matrix = new Matrix4x4
         {
-            V00 = 1, V01 = 0, V02 = 0, V03 = 0,
-            V10 = 0, V11 = (float)Math.Cos(t), V12 = (float)(-1 * Math.Sin(t)), V13 = 0,
-            V20 = 0, V21 = (float)Math.Sin(t), V22 = (float)Math.Cos(t), V23 = 0,
-            V30 = 0, V31 = 0, V32 = 0, V33 = 1
+            V00 = 1,
+            V01 = 0,
+            V02 = 0,
+            V03 = 0,
+            V10 = 0,
+            V11 = (float)Math.Cos(t),
+            V12 = (float)(-1 * Math.Sin(t)),
+            V13 = 0,
+            V20 = 0,
+            V21 = (float)Math.Sin(t),
+            V22 = (float)Math.Cos(t),
+            V23 = 0,
+            V30 = 0,
+            V31 = 0,
+            V32 = 0,
+            V33 = 1
         };
 
         _matrices.Insert(0, matrix);
@@ -190,12 +230,24 @@ public class Controller
     {
         Matrix4x4 matrix = new Matrix4x4
         {
-            V00 = (float)Math.Cos(t), V01 =(float)(-1 * Math.Sin(t)), V02 = 0, V03 = 0,
-            V10 = (float)Math.Sin(t), V11 = (float)Math.Cos(t), V12 = 0, V13 = 0,
-            V20 = 0, V21 = 0, V22 = 1, V23 = 0,
-            V30 = 0, V31 = 0, V32 = 0, V33 = 1
+            V00 = (float)Math.Cos(t),
+            V01 = (float)(-1 * Math.Sin(t)),
+            V02 = 0,
+            V03 = 0,
+            V10 = (float)Math.Sin(t),
+            V11 = (float)Math.Cos(t),
+            V12 = 0,
+            V13 = 0,
+            V20 = 0,
+            V21 = 0,
+            V22 = 1,
+            V23 = 0,
+            V30 = 0,
+            V31 = 0,
+            V32 = 0,
+            V33 = 1
         };
-        
+
         _matrices.Insert(0, matrix);
     }
 
@@ -208,14 +260,23 @@ public class Controller
     {
         Matrix4x4 matrix = new Matrix4x4
         {
-            V00 = 1, V01 = 0, V02 = 0, V03 = x,
-            V10 = 0, V11 = 1, V12 = 0, V13 = y,
-            V20 = 0, V21 = 0, V22 = 1, V23 = z,
-            V30 = 0, V31 = 0, V32 = 0, V33 = 1
-            
+            V00 = 1,
+            V01 = 0,
+            V02 = 0,
+            V03 = x,
+            V10 = 0,
+            V11 = 1,
+            V12 = 0,
+            V13 = y,
+            V20 = 0,
+            V21 = 0,
+            V22 = 1,
+            V23 = z,
+            V30 = 0,
+            V31 = 0,
+            V32 = 0,
+            V33 = 1
         };
         return matrix;
     }
-    
-
 }
