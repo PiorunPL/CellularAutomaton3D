@@ -39,14 +39,6 @@ public class Controller
 
     public SKBitmap CreatePhoto()
     {
-        _iterationTimeout--;
-        if (_iterationTimeout <= 0)
-        {
-            _iterationTimeout = 15;
-            // _world.IterateWorld();
-            _world.IterateWorldParallel();
-        }
-
         if (_matrices.Count != 0)
         {
             Matrix4x4 resultMatrix = _matrices[0];
@@ -81,6 +73,14 @@ public class Controller
 
         _camera.PassActualWorld(chosenTriangles);
         var result = _camera.CreatePhotoTriangles();
+
+        _iterationTimeout--;
+        if (_iterationTimeout <= 0)
+        {
+            _iterationTimeout = 10;
+            // _world.IterateWorld();
+            _world.IterateWorldParallel();
+        }
 
         return result;
     }

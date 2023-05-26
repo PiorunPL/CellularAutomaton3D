@@ -20,11 +20,11 @@ public class WorldCellularAutomaton
 
     List<int[]> colors = new List<int[]>
     {
-        new int[] { 255, 0, 0 },
+        new int[] { 0, 0, 0 },
         new int[] { 255, 255, 0 },
-        new int[] { 0, 255, 0 },
-        new int[] { 0, 255, 255 },
-        new int[] { 0, 0, 255 }
+        new int[] { 255, 85, 0 },
+        new int[] { 255, 170, 0 },
+        new int[] { 255, 0, 0 }
     };
 
     public WorldCellularAutomaton(int x, int y, int z)
@@ -36,8 +36,8 @@ public class WorldCellularAutomaton
         sizeZ = z;
 
         SetUpAutomatonWorld();
-        InitializeStartMap(Maps.map1);
-        // InitializeStartHaos();
+        // InitializeStartMap(Maps.map2);
+        InitializeStartHaos();
     }
 
     public void SetUpAutomatonWorld()
@@ -109,24 +109,21 @@ public class WorldCellularAutomaton
             }
         }
 
-        int age;
         for (int x = 0; x < sizeX; x++)
         {
             for (int y = 0; y < sizeY; y++)
             {
                 for (int z = 0; z < sizeZ; z++)
                 {
-                    if (tmpMap[x, y, z] == 1)
+                    mapOfAutomaton[x, y, z] = tmpMap[x, y, z];
+                    if (mapOfAutomaton[x, y, z] == 0)
                     {
-                        mapOfAutomaton[x, y, z] += 1;
-                        age = mapOfAutomaton[x, y, z] > 5 ? 5 : mapOfAutomaton[x, y, z];
-                        mapOfAutomatonCubes[x, y, z].MakeVisible();
-                        mapOfAutomatonCubes[x, y, z].SetColor(colors[age - 1]);
+                        mapOfAutomatonCubes[x, y, z].MakeInvisible();
                     }
                     else
                     {
-                        mapOfAutomatonCubes[x, y, z].MakeInvisible();
-                        mapOfAutomaton[x, y, z] = 0;
+                        mapOfAutomatonCubes[x, y, z].SetColor(colors[mapOfAutomaton[x, y, z]]);
+                        mapOfAutomatonCubes[x, y, z].MakeVisible();
                     }
                 }
             }
@@ -161,17 +158,15 @@ public class WorldCellularAutomaton
                 {
                     for (int z = 0; z < sizeZ; z++)
                     {
-                        if (tmpMap[x, y, z] == 1)
+                        mapOfAutomaton[x, y, z] = tmpMap[x, y, z];
+                        if (mapOfAutomaton[x, y, z] == 0)
                         {
-                            mapOfAutomaton[x, y, z] += 1;
-                            int age = mapOfAutomaton[x, y, z] > 5 ? 5 : mapOfAutomaton[x, y, z];
-                            mapOfAutomatonCubes[x, y, z].MakeVisible();
-                            mapOfAutomatonCubes[x, y, z].SetColor(colors[age - 1]);
+                            mapOfAutomatonCubes[x, y, z].MakeInvisible();
                         }
                         else
                         {
-                            mapOfAutomatonCubes[x, y, z].MakeInvisible();
-                            mapOfAutomaton[x, y, z] = 0;
+                            mapOfAutomatonCubes[x, y, z].SetColor(colors[mapOfAutomaton[x, y, z]]);
+                            mapOfAutomatonCubes[x, y, z].MakeVisible();
                         }
                     }
                 }
@@ -195,71 +190,91 @@ public class WorldCellularAutomaton
     private int IterateCube(int x, int y, int z)
     {
         int neighboursCount = CountNeighbours(x, y, z, Neighbourhood.Moore);
-
-        // if (mapOfAutomaton[x, y, z] > 0)
-        // {
-        //     if (neighboursCount == 4 || neighboursCount == 5)
-        //         tmpMap[x, y, z] = 1;
-        //     else
-        //         tmpMap[x, y, z] = 0;
-        // }
-        // else
-        // {
-        //     if (neighboursCount == 4)
-        //         tmpMap[x, y, z] = 1;
-        // }
-        if (neighboursCount == 3)
+        if (mapOfAutomaton[x, y, z] == 4)
         {
-            // tmpMap[x, y, z] = 1;
-            return 1;
+            if (neighboursCount == 4)
+                return 4;
         }
-        return 0;
+        else if (mapOfAutomaton[x, y, z] == 0)
+        {
+            if (neighboursCount == 4)
+            {
+                return 4;
+            }
+            return 0;
+        }
+
+        return mapOfAutomaton[x, y, z] - 1;
     }
 
     private int CountNeighbours(int x, int y, int z, Neighbourhood n)
     {
         int neighboursCount = 0;
 
-        if (x > 0 && mapOfAutomaton[x - 1, y, z] > 0)
+        if (x > 0 && mapOfAutomaton[x - 1, y, z] == 4)
             neighboursCount++;
-        if (x < sizeX - 1 && mapOfAutomaton[x + 1, y, z] > 0)
+        if (x < sizeX - 1 && mapOfAutomaton[x + 1, y, z] == 4)
             neighboursCount++;
-        if (y > 0 && mapOfAutomaton[x, y - 1, z] > 0)
+        if (y > 0 && mapOfAutomaton[x, y - 1, z] == 4)
             neighboursCount++;
-        if (y < sizeY - 1 && mapOfAutomaton[x, y + 1, z] > 0)
+        if (y < sizeY - 1 && mapOfAutomaton[x, y + 1, z] == 4)
             neighboursCount++;
-        if (z > 0 && mapOfAutomaton[x, y, z - 1] > 0)
+        if (z > 0 && mapOfAutomaton[x, y, z - 1] == 4)
             neighboursCount++;
-        if (z < sizeZ - 1 && mapOfAutomaton[x, y, z + 1] > 0)
+        if (z < sizeZ - 1 && mapOfAutomaton[x, y, z + 1] == 4)
             neighboursCount++;
 
         if (n == Neighbourhood.Moore)
         {
-            if (x > 0 && y > 0 && mapOfAutomaton[x - 1, y - 1, z] > 0)
+            if (x > 0 && y > 0 && mapOfAutomaton[x - 1, y - 1, z] == 4)
                 neighboursCount++;
-            if (x > 0 && y < sizeY - 1 && mapOfAutomaton[x - 1, y + 1, z] > 0)
+            if (x > 0 && y < sizeY - 1 && mapOfAutomaton[x - 1, y + 1, z] == 4)
                 neighboursCount++;
-            if (x > 0 && z > 0 && mapOfAutomaton[x - 1, y, z - 1] > 0)
+            if (x > 0 && z > 0 && mapOfAutomaton[x - 1, y, z - 1] == 4)
                 neighboursCount++;
-            if (x > 0 && z < sizeZ - 1 && mapOfAutomaton[x - 1, y, z + 1] > 0)
-                neighboursCount++;
-
-            if (x < sizeX - 1 && y > 0 && mapOfAutomaton[x + 1, y - 1, z] > 0)
-                neighboursCount++;
-            if (x < sizeX - 1 && y < sizeY - 1 && mapOfAutomaton[x + 1, y + 1, z] > 0)
-                neighboursCount++;
-            if (x < sizeX - 1 && z > 0 && mapOfAutomaton[x + 1, y, z - 1] > 0)
-                neighboursCount++;
-            if (x < sizeX - 1 && z < sizeZ - 1 && mapOfAutomaton[x + 1, y, z + 1] > 0)
+            if (x > 0 && z < sizeZ - 1 && mapOfAutomaton[x - 1, y, z + 1] == 4)
                 neighboursCount++;
 
-            if (y > 0 && z > 0 && mapOfAutomaton[x, y - 1, z - 1] > 0)
+            if (x < sizeX - 1 && y > 0 && mapOfAutomaton[x + 1, y - 1, z] == 4)
                 neighboursCount++;
-            if (y > 0 && z < sizeZ - 1 && mapOfAutomaton[x, y - 1, z + 1] > 0)
+            if (x < sizeX - 1 && y < sizeY - 1 && mapOfAutomaton[x + 1, y + 1, z] == 4)
                 neighboursCount++;
-            if (y < sizeY - 1 && z > 0 && mapOfAutomaton[x, y + 1, z - 1] > 0)
+            if (x < sizeX - 1 && z > 0 && mapOfAutomaton[x + 1, y, z - 1] == 4)
                 neighboursCount++;
-            if (y < sizeY - 1 && z < sizeZ - 1 && mapOfAutomaton[x, y + 1, z + 1] > 0)
+            if (x < sizeX - 1 && z < sizeZ - 1 && mapOfAutomaton[x + 1, y, z + 1] == 4)
+                neighboursCount++;
+
+            if (y > 0 && z > 0 && mapOfAutomaton[x, y - 1, z - 1] == 4)
+                neighboursCount++;
+            if (y > 0 && z < sizeZ - 1 && mapOfAutomaton[x, y - 1, z + 1] == 4)
+                neighboursCount++;
+            if (y < sizeY - 1 && z > 0 && mapOfAutomaton[x, y + 1, z - 1] == 4)
+                neighboursCount++;
+            if (y < sizeY - 1 && z < sizeZ - 1 && mapOfAutomaton[x, y + 1, z + 1] == 4)
+                neighboursCount++;
+
+            // Corners
+            if (x > 0 && y > 0 && z > 0 && mapOfAutomaton[x - 1, y - 1, z - 1] == 4)
+                neighboursCount++;
+            if (x > 0 && y > 0 && z < sizeZ - 1 && mapOfAutomaton[x - 1, y - 1, z + 1] == 4)
+                neighboursCount++;
+            if (x > 0 && y < sizeY - 1 && z > 0 && mapOfAutomaton[x - 1, y + 1, z - 1] == 4)
+                neighboursCount++;
+            if (x > 0 && y < sizeY - 1 && z < sizeZ - 1 && mapOfAutomaton[x - 1, y + 1, z + 1] == 4)
+                neighboursCount++;
+
+            if (x < sizeX - 1 && y > 0 && z > 0 && mapOfAutomaton[x + 1, y - 1, z - 1] == 4)
+                neighboursCount++;
+            if (x < sizeX - 1 && y > 0 && z < sizeZ - 1 && mapOfAutomaton[x + 1, y - 1, z + 1] == 4)
+                neighboursCount++;
+            if (x < sizeX - 1 && y < sizeY - 1 && z > 0 && mapOfAutomaton[x + 1, y + 1, z - 1] == 4)
+                neighboursCount++;
+            if (
+                x < sizeX - 1
+                && y < sizeY - 1
+                && z < sizeZ - 1
+                && mapOfAutomaton[x + 1, y + 1, z + 1] == 4
+            )
                 neighboursCount++;
         }
         return neighboursCount;
@@ -285,7 +300,7 @@ public class WorldCellularAutomaton
                 {
                     if (map[x, y, z] == 1)
                     {
-                        mapOfAutomaton[startX + x, startY + y, startZ + z] = 1;
+                        mapOfAutomaton[startX + x, startY + y, startZ + z] = 4;
                         mapOfAutomatonCubes[startX + x, startY + y, startZ + z].MakeVisible();
                     }
                     else
@@ -301,16 +316,16 @@ public class WorldCellularAutomaton
     public void InitializeStartHaos()
     {
         Random rnd = new Random();
-        for (int i = 0; i < sizeX; i++)
+        for (int i = 5; i < sizeX - 5; i++)
         {
-            for (int j = 0; j < sizeY; j++)
+            for (int j = 5; j < sizeY - 5; j++)
             {
-                for (int k = 0; k < sizeZ; k++)
+                for (int k = 5; k < sizeZ; k++)
                 {
-                    if (rnd.Next() % 10 == 0)
+                    if (rnd.Next() % 3 == 0)
                     {
                         mapOfAutomatonCubes[i, j, k].MakeVisible();
-                        mapOfAutomaton[i, j, k] = 1;
+                        mapOfAutomaton[i, j, k] = 4;
                     }
                     else
                     {
