@@ -1,4 +1,5 @@
 using MainProject.Domain.Basic;
+using System.Threading.Tasks;
 
 namespace MainProject.Domain.WorldRelated;
 
@@ -95,17 +96,19 @@ public class WorldCellularAutomaton
     public void IterateWorld()
     {
         int[,,] tmpMap = new int[sizeX, sizeY, sizeZ];
-
-        for (int x = 0; x < sizeX; x++)
+        int[,] tmpLayer;
+        for (int z = 0; z < sizeZ; z++)
         {
-            for (int y = 0; y < sizeY; y++)
+            tmpLayer = IterateLayer(z);
+            for (int x = 0; x < sizeX; x++)
             {
-                for (int z = 0; z < sizeZ; z++)
+                for (int y = 0; y < sizeY; y++)
                 {
-                    IterateCube(tmpMap, x, y, z);
+                    tmpMap[x, y, z] = tmpLayer[x, y];
                 }
             }
         }
+
         int age;
         for (int x = 0; x < sizeX; x++)
         {
@@ -130,12 +133,58 @@ public class WorldCellularAutomaton
         }
     }
 
+    public void IterateWorldParallel()
+    {
+        int[,,] tmpMap = new int[sizeX, sizeY, sizeZ];
+        Parallel.For(
+            0,
+            sizeZ,
+            z =>
+            {
+                var tmpLayer = IterateLayer(z);
+                for (int x = 0; x < sizeX; x++)
+                {
+                    for (int y = 0; y < sizeY; y++)
+                    {
+                        tmpMap[x, y, z] = tmpLayer[x, y];
+                    }
+                }
+            }
+        );
+
+        Parallel.For(
+            0,
+            sizeX,
+            x =>
+            {
+                for (int y = 0; y < sizeY; y++)
+                {
+                    for (int z = 0; z < sizeZ; z++)
+                    {
+                        if (tmpMap[x, y, z] == 1)
+                        {
+                            mapOfAutomaton[x, y, z] += 1;
+                            int age = mapOfAutomaton[x, y, z] > 5 ? 5 : mapOfAutomaton[x, y, z];
+                            mapOfAutomatonCubes[x, y, z].MakeVisible();
+                            mapOfAutomatonCubes[x, y, z].SetColor(colors[age - 1]);
+                        }
+                        else
+                        {
+                            mapOfAutomatonCubes[x, y, z].MakeInvisible();
+                            mapOfAutomaton[x, y, z] = 0;
+                        }
+                    }
+                }
+            }
+        );
+    }
+
     private int[,] IterateLayer(int layerZ)
     {
         int[,] tmpLayer = new int[sizeX, sizeY];
-        for(int x = 0; x < sizeX; x++)
+        for (int x = 0; x < sizeX; x++)
         {
-            for(int y = 0; y < sizeY; y++)
+            for (int y = 0; y < sizeY; y++)
             {
                 tmpLayer[x, y] = IterateCube(x, y, layerZ);
             }

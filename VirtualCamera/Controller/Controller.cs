@@ -17,7 +17,7 @@ public class Controller
     private readonly BSPTreeBuilder _bspTreeBuilder = new BSPTreeBuilder();
     private readonly int _numberOfChunks = 50;
     private Node _BSPTreeRoot;
-    private int _iterationTimeoout = 60;
+    private int _iterationTimeout = 15;
 
     public Controller()
     {
@@ -39,6 +39,14 @@ public class Controller
 
     public SKBitmap CreatePhoto()
     {
+        _iterationTimeout--;
+        if (_iterationTimeout <= 0)
+        {
+            _iterationTimeout = 15;
+            // _world.IterateWorld();
+            _world.IterateWorldParallel();
+        }
+
         if (_matrices.Count != 0)
         {
             Matrix4x4 resultMatrix = _matrices[0];
@@ -73,12 +81,7 @@ public class Controller
 
         _camera.PassActualWorld(chosenTriangles);
         var result = _camera.CreatePhotoTriangles();
-        _iterationTimeoout--;
-        if (_iterationTimeoout <= 0)
-        {
-            _iterationTimeoout = 30;
-            _world.IterateWorld();
-        }
+
         return result;
     }
 
