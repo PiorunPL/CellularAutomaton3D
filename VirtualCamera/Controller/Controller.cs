@@ -28,9 +28,9 @@ public class Controller
         
         //Update world, after dividing triangles
         //Important! First Add new Triangles, then remove old ones
-        _world.Triangles.AddRange(_bspTreeBuilder.newTrianglesToWorld);
-        _world.Points.AddRange(_bspTreeBuilder.newPointToWorld);
-        foreach (var triangle in _bspTreeBuilder.trianglesToRemoveFromWorld)
+        _world.Triangles.AddRange(_bspTreeBuilder.NewTrianglesToWorld);
+        _world.Points.AddRange(_bspTreeBuilder.NewPointToWorld);
+        foreach (var triangle in _bspTreeBuilder.TrianglesToRemoveFromWorld)
         {
             _world.Triangles.Remove(triangle);
         }
