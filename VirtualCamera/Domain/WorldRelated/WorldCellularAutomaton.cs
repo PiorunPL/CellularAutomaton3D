@@ -35,8 +35,8 @@ public class WorldCellularAutomaton
         sizeZ = z;
 
         SetUpAutomatonWorld();
-        // InitializeStartMap(Maps.map1);
-        InitializeStartHaos();
+        InitializeStartMap(Maps.map1);
+        // InitializeStartHaos();
     }
 
     public void SetUpAutomatonWorld()
@@ -130,22 +130,41 @@ public class WorldCellularAutomaton
         }
     }
 
-    private void IterateCube(int[,,] tmpMap, int x, int y, int z)
+    private int[,] IterateLayer(int layerZ)
+    {
+        int[,] tmpLayer = new int[sizeX, sizeY];
+        for(int x = 0; x < sizeX; x++)
+        {
+            for(int y = 0; y < sizeY; y++)
+            {
+                tmpLayer[x, y] = IterateCube(x, y, layerZ);
+            }
+        }
+        return tmpLayer;
+    }
+
+    private int IterateCube(int x, int y, int z)
     {
         int neighboursCount = CountNeighbours(x, y, z, Neighbourhood.Moore);
 
-        if (mapOfAutomaton[x, y, z] > 0)
+        // if (mapOfAutomaton[x, y, z] > 0)
+        // {
+        //     if (neighboursCount == 4 || neighboursCount == 5)
+        //         tmpMap[x, y, z] = 1;
+        //     else
+        //         tmpMap[x, y, z] = 0;
+        // }
+        // else
+        // {
+        //     if (neighboursCount == 4)
+        //         tmpMap[x, y, z] = 1;
+        // }
+        if (neighboursCount == 3)
         {
-            if (neighboursCount == 4 || neighboursCount == 5)
-                tmpMap[x, y, z] = 1;
-            else
-                tmpMap[x, y, z] = 0;
+            // tmpMap[x, y, z] = 1;
+            return 1;
         }
-        else
-        {
-            if (neighboursCount == 4)
-                tmpMap[x, y, z] = 1;
-        }
+        return 0;
     }
 
     private int CountNeighbours(int x, int y, int z, Neighbourhood n)
