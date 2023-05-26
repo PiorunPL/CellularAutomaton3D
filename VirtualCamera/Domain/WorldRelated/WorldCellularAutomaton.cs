@@ -8,7 +8,8 @@ public class WorldCellularAutomaton
     public List<Point> Points = new List<Point>();
     public List<Cube> Cubes = new List<Cube>();
 
-    public Cube[,,] mapOfAutomaton;
+    public Cube[,,] mapOfAutomatonCubes;
+    public int[,,] mapOfAutomaton;
     public int sizeX;
     public int sizeY;
     public int sizeZ;
@@ -16,23 +17,26 @@ public class WorldCellularAutomaton
     public const double sizeOfSingleCube = 0.5;
     public const double startDistanceFromAutomaton = 10;
 
-    int[] color1 = new int[] { 255, 40, 0 };
-    int[] color2 = new int[] { 255, 80, 0 };
-    int[] color3 = new int[] { 255, 120, 0 };
-    int[] color4 = new int[] { 255, 160, 0 };
-    int[] color5 = new int[] { 255, 200, 0 };
-    int[] color6 = new int[] { 255, 240, 0 };
+    List<int[]> colors = new List<int[]>
+    {
+        new int[] { 255, 0, 0 },
+        new int[] { 255, 255, 0 },
+        new int[] { 0, 255, 0 },
+        new int[] { 0, 255, 255 },
+        new int[] { 0, 0, 255 }
+    };
 
     public WorldCellularAutomaton(int x, int y, int z)
     {
-        mapOfAutomaton = new Cube[x, y, z];
+        mapOfAutomatonCubes = new Cube[x, y, z];
+        mapOfAutomaton = new int[x, y, z];
         sizeX = x;
         sizeY = y;
         sizeZ = z;
 
         SetUpAutomatonWorld();
-        InitializeStartMap(Maps.map1);
-        // InitializeStartHaos();
+        // InitializeStartMap(Maps.map1);
+        InitializeStartHaos();
     }
 
     public void SetUpAutomatonWorld()
@@ -82,7 +86,7 @@ public class WorldCellularAutomaton
                     );
                     Cubes.Add(cube);
                     cube.MakeInvisible();
-                    mapOfAutomaton[i, j, k] = cube;
+                    mapOfAutomatonCubes[i, j, k] = cube;
                 }
             }
         }
@@ -102,6 +106,7 @@ public class WorldCellularAutomaton
                 }
             }
         }
+        int age;
         for (int x = 0; x < sizeX; x++)
         {
             for (int y = 0; y < sizeY; y++)
@@ -110,11 +115,15 @@ public class WorldCellularAutomaton
                 {
                     if (tmpMap[x, y, z] == 1)
                     {
-                        mapOfAutomaton[x, y, z].MakeVisible();
+                        mapOfAutomaton[x, y, z] += 1;
+                        age = mapOfAutomaton[x, y, z] > 5 ? 5 : mapOfAutomaton[x, y, z];
+                        mapOfAutomatonCubes[x, y, z].MakeVisible();
+                        mapOfAutomatonCubes[x, y, z].SetColor(colors[age - 1]);
                     }
                     else
                     {
-                        mapOfAutomaton[x, y, z].MakeInvisible();
+                        mapOfAutomatonCubes[x, y, z].MakeInvisible();
+                        mapOfAutomaton[x, y, z] = 0;
                     }
                 }
             }
@@ -125,13 +134,17 @@ public class WorldCellularAutomaton
     {
         int neighboursCount = CountNeighbours(x, y, z, Neighbourhood.Moore);
 
-        if (neighboursCount == 1)
+        if (mapOfAutomaton[x, y, z] > 0)
         {
-            tmpMap[x, y, z] = 1;
+            if (neighboursCount == 4 || neighboursCount == 5)
+                tmpMap[x, y, z] = 1;
+            else
+                tmpMap[x, y, z] = 0;
         }
         else
         {
-            tmpMap[x, y, z] = 0;
+            if (neighboursCount == 4)
+                tmpMap[x, y, z] = 1;
         }
     }
 
@@ -139,46 +152,46 @@ public class WorldCellularAutomaton
     {
         int neighboursCount = 0;
 
-        if (x > 0 && mapOfAutomaton[x - 1, y, z].IsVisible())
+        if (x > 0 && mapOfAutomaton[x - 1, y, z] > 0)
             neighboursCount++;
-        if (x < sizeX - 1 && mapOfAutomaton[x + 1, y, z].IsVisible())
+        if (x < sizeX - 1 && mapOfAutomaton[x + 1, y, z] > 0)
             neighboursCount++;
-        if (y > 0 && mapOfAutomaton[x, y - 1, z].IsVisible())
+        if (y > 0 && mapOfAutomaton[x, y - 1, z] > 0)
             neighboursCount++;
-        if (y < sizeY - 1 && mapOfAutomaton[x, y + 1, z].IsVisible())
+        if (y < sizeY - 1 && mapOfAutomaton[x, y + 1, z] > 0)
             neighboursCount++;
-        if (z > 0 && mapOfAutomaton[x, y, z - 1].IsVisible())
+        if (z > 0 && mapOfAutomaton[x, y, z - 1] > 0)
             neighboursCount++;
-        if (z < sizeZ - 1 && mapOfAutomaton[x, y, z + 1].IsVisible())
+        if (z < sizeZ - 1 && mapOfAutomaton[x, y, z + 1] > 0)
             neighboursCount++;
 
         if (n == Neighbourhood.Moore)
         {
-            if (x > 0 && y > 0 && mapOfAutomaton[x - 1, y - 1, z].IsVisible())
+            if (x > 0 && y > 0 && mapOfAutomaton[x - 1, y - 1, z] > 0)
                 neighboursCount++;
-            if (x > 0 && y < sizeY - 1 && mapOfAutomaton[x - 1, y + 1, z].IsVisible())
+            if (x > 0 && y < sizeY - 1 && mapOfAutomaton[x - 1, y + 1, z] > 0)
                 neighboursCount++;
-            if (x > 0 && z > 0 && mapOfAutomaton[x - 1, y, z - 1].IsVisible())
+            if (x > 0 && z > 0 && mapOfAutomaton[x - 1, y, z - 1] > 0)
                 neighboursCount++;
-            if (x > 0 && z < sizeZ - 1 && mapOfAutomaton[x - 1, y, z + 1].IsVisible())
-                neighboursCount++;
-
-            if (x < sizeX - 1 && y > 0 && mapOfAutomaton[x + 1, y - 1, z].IsVisible())
-                neighboursCount++;
-            if (x < sizeX - 1 && y < sizeY - 1 && mapOfAutomaton[x + 1, y + 1, z].IsVisible())
-                neighboursCount++;
-            if (x < sizeX - 1 && z > 0 && mapOfAutomaton[x + 1, y, z - 1].IsVisible())
-                neighboursCount++;
-            if (x < sizeX - 1 && z < sizeZ - 1 && mapOfAutomaton[x + 1, y, z + 1].IsVisible())
+            if (x > 0 && z < sizeZ - 1 && mapOfAutomaton[x - 1, y, z + 1] > 0)
                 neighboursCount++;
 
-            if (y > 0 && z > 0 && mapOfAutomaton[x, y - 1, z - 1].IsVisible())
+            if (x < sizeX - 1 && y > 0 && mapOfAutomaton[x + 1, y - 1, z] > 0)
                 neighboursCount++;
-            if (y > 0 && z < sizeZ - 1 && mapOfAutomaton[x, y - 1, z + 1].IsVisible())
+            if (x < sizeX - 1 && y < sizeY - 1 && mapOfAutomaton[x + 1, y + 1, z] > 0)
                 neighboursCount++;
-            if (y < sizeY - 1 && z > 0 && mapOfAutomaton[x, y + 1, z - 1].IsVisible())
+            if (x < sizeX - 1 && z > 0 && mapOfAutomaton[x + 1, y, z - 1] > 0)
                 neighboursCount++;
-            if (y < sizeY - 1 && z < sizeZ - 1 && mapOfAutomaton[x, y + 1, z + 1].IsVisible())
+            if (x < sizeX - 1 && z < sizeZ - 1 && mapOfAutomaton[x + 1, y, z + 1] > 0)
+                neighboursCount++;
+
+            if (y > 0 && z > 0 && mapOfAutomaton[x, y - 1, z - 1] > 0)
+                neighboursCount++;
+            if (y > 0 && z < sizeZ - 1 && mapOfAutomaton[x, y - 1, z + 1] > 0)
+                neighboursCount++;
+            if (y < sizeY - 1 && z > 0 && mapOfAutomaton[x, y + 1, z - 1] > 0)
+                neighboursCount++;
+            if (y < sizeY - 1 && z < sizeZ - 1 && mapOfAutomaton[x, y + 1, z + 1] > 0)
                 neighboursCount++;
         }
         return neighboursCount;
@@ -203,9 +216,15 @@ public class WorldCellularAutomaton
                 for (int z = 0; z < map.GetLength(0); z++)
                 {
                     if (map[x, y, z] == 1)
-                        mapOfAutomaton[startX + x, startY + y, startZ + z].MakeVisible();
+                    {
+                        mapOfAutomaton[startX + x, startY + y, startZ + z] = 1;
+                        mapOfAutomatonCubes[startX + x, startY + y, startZ + z].MakeVisible();
+                    }
                     else
-                        mapOfAutomaton[startX + x, startY + y, startZ + z].MakeInvisible();
+                    {
+                        mapOfAutomaton[startX + x, startY + y, startZ + z] = 0;
+                        mapOfAutomatonCubes[startX + x, startY + y, startZ + z].MakeInvisible();
+                    }
                 }
             }
         }
@@ -221,9 +240,15 @@ public class WorldCellularAutomaton
                 for (int k = 0; k < sizeZ; k++)
                 {
                     if (rnd.Next() % 10 == 0)
-                        mapOfAutomaton[i, j, k].MakeVisible();
+                    {
+                        mapOfAutomatonCubes[i, j, k].MakeVisible();
+                        mapOfAutomaton[i, j, k] = 1;
+                    }
                     else
-                        mapOfAutomaton[i, j, k].MakeInvisible();
+                    {
+                        mapOfAutomatonCubes[i, j, k].MakeInvisible();
+                        mapOfAutomaton[i, j, k] = 0;
+                    }
                 }
             }
         }
@@ -232,28 +257,28 @@ public class WorldCellularAutomaton
     public Cube CreateCube(Point a, Point b, Point c, Point d, Point e, Point f, Point g, Point h)
     {
         //Front
-        Triangle t1 = new Triangle(a, b, d, color1);
-        Triangle t2 = new Triangle(b, c, d, color1);
+        Triangle t1 = new Triangle(a, b, d);
+        Triangle t2 = new Triangle(b, c, d);
 
         //Back
-        Triangle t3 = new Triangle(e, f, h, color2);
-        Triangle t4 = new Triangle(f, g, h, color2);
+        Triangle t3 = new Triangle(e, f, h);
+        Triangle t4 = new Triangle(f, g, h);
 
         //Top
-        Triangle t5 = new Triangle(b, c, f, color3);
-        Triangle t6 = new Triangle(c, f, g, color3);
+        Triangle t5 = new Triangle(b, c, f);
+        Triangle t6 = new Triangle(c, f, g);
 
         //Bottom
-        Triangle t7 = new Triangle(a, e, d, color4);
-        Triangle t8 = new Triangle(d, e, h, color4);
+        Triangle t7 = new Triangle(a, e, d);
+        Triangle t8 = new Triangle(d, e, h);
 
         //Right
-        Triangle t9 = new Triangle(c, d, h, color5);
-        Triangle t10 = new Triangle(c, g, h, color5);
+        Triangle t9 = new Triangle(c, d, h);
+        Triangle t10 = new Triangle(c, g, h);
 
         //Left
-        Triangle t11 = new Triangle(a, b, f, color6);
-        Triangle t12 = new Triangle(a, e, f, color6);
+        Triangle t11 = new Triangle(a, b, f);
+        Triangle t12 = new Triangle(a, e, f);
 
         Cube cube = new Cube();
         cube.Triangles.Add(t1);

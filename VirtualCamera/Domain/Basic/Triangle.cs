@@ -9,13 +9,13 @@ public class Triangle
     public int[] color;
     public string position;
     public bool isVisible = true;
-    
+
     public Triangle(Point p1, Point p2, Point p3)
     {
         P1 = p1;
         P2 = p2;
         P3 = p3;
-        this.color = new int[]{255, 0, 0};
+        this.color = new int[] { 255, 0, 0 };
         Normal = GetNormalVector();
     }
 
@@ -32,30 +32,45 @@ public class Triangle
     {
         Vector v1 = Vector.GetVector(P1.CurrentPosition, P2.CurrentPosition);
         Vector v2 = Vector.GetVector(P1.CurrentPosition, P3.CurrentPosition);
-        return Vector.GetCrossProduct(v1,v2);
+        return Vector.GetCrossProduct(v1, v2);
     }
 
     public Vector GetNormalisedNormalVector()
     {
         Vector normal = GetNormalVector();
-        double vectorLength = Math.Sqrt(Math.Pow(normal.X, 2) + Math.Pow(normal.Y, 2) + Math.Pow(normal.Z, 2));
-        if(vectorLength == 0) {
+        double vectorLength = Math.Sqrt(
+            Math.Pow(normal.X, 2) + Math.Pow(normal.Y, 2) + Math.Pow(normal.Z, 2)
+        );
+        if (vectorLength == 0)
+        {
             return normal;
         }
-        return new Vector(normal.X/vectorLength, normal.Y/vectorLength, normal.Z/vectorLength);
+        return new Vector(
+            normal.X / vectorLength,
+            normal.Y / vectorLength,
+            normal.Z / vectorLength
+        );
     }
-    
+
     // result > 0 - behind
-    // result = 0 - on plain 
+    // result = 0 - on plain
     // result < 0 - in front
     public double CheckPointPosition(Point3D toCheck)
     {
-        return Vector.GetDotProduct(GetNormalisedNormalVector(), Vector.GetVector(P1.CurrentPosition, toCheck));
+        return Vector.GetDotProduct(
+            GetNormalisedNormalVector(),
+            Vector.GetVector(P1.CurrentPosition, toCheck)
+        );
     }
 
     public override string ToString()
     {
         // return String.Format("Triangle [P1: {0}; P2: {1}; P3: {2}]", P1, P2, P3);
         return position;
+    }
+
+    public void SetColor(int[] color)
+    {
+        this.color = color;
     }
 }

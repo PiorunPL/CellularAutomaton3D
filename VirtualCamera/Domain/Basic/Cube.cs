@@ -29,6 +29,14 @@ public class Cube
         }
     }
 
+    public void SetColor(int[] color)
+    {
+        foreach (var triangle in Triangles)
+        {
+            triangle.SetColor(color);
+        }
+    }
+
     public bool IsVisible()
     {
         return _isVisible;
