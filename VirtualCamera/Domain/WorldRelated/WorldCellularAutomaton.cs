@@ -189,7 +189,8 @@ public class WorldCellularAutomaton
 
     private int IterateCube(int x, int y, int z)
     {
-        int neighboursCount = CountNeighbours(x, y, z, Neighbourhood.Moore);
+        // int neighboursCount = CountNeighbours(x, y, z, Neighbourhood.Moore);
+        int neighboursCount = CountNeighboursINF(x, y, z, Neighbourhood.Moore);
         if (mapOfAutomaton[x, y, z] == 4)
         {
             if (neighboursCount == 4)
@@ -280,6 +281,82 @@ public class WorldCellularAutomaton
         return neighboursCount;
     }
 
+    // Count neighbours for with continuous space
+    private int CountNeighboursINF(int x, int y, int z, Neighbourhood n)
+    {
+        int neighboursCount = 0;
+
+        var x_minus = x > 0 ? x - 1 : sizeX - 1;
+        var x_plus = x < sizeX - 1 ? x + 1 : 0;
+        var y_minus = y > 0 ? y - 1 : sizeY - 1;
+        var y_plus = y < sizeY - 1 ? y + 1 : 0;
+        var z_minus = z > 0 ? z - 1 : sizeZ - 1;
+        var z_plus = z < sizeZ - 1 ? z + 1 : 0;
+
+        if (mapOfAutomaton[x_minus, y, z] == 4)
+            neighboursCount++;
+        if (mapOfAutomaton[x_plus, y, z] == 4)
+            neighboursCount++;
+        if (mapOfAutomaton[x, y_minus, z] == 4)
+            neighboursCount++;
+        if (mapOfAutomaton[x, y_plus, z] == 4)
+            neighboursCount++;
+        if (mapOfAutomaton[x, y, z_minus] == 4)
+            neighboursCount++;
+        if (mapOfAutomaton[x, y, z_plus] == 4)
+            neighboursCount++;
+
+        if (n == Neighbourhood.Moore)
+        {
+            if (mapOfAutomaton[x_minus, y_minus, z] == 4)
+                neighboursCount++;
+            if (mapOfAutomaton[x_minus, y_plus, z] == 4)
+                neighboursCount++;
+            if (mapOfAutomaton[x_minus, y, z_minus] == 4)
+                neighboursCount++;
+            if (mapOfAutomaton[x_minus, y, z_plus] == 4)
+                neighboursCount++;
+
+            if (mapOfAutomaton[x_plus, y_minus, z] == 4)
+                neighboursCount++;
+            if (mapOfAutomaton[x_plus, y_plus, z] == 4)
+                neighboursCount++;
+            if (mapOfAutomaton[x_plus, y, z_minus] == 4)
+                neighboursCount++;
+            if (mapOfAutomaton[x_plus, y, z_plus] == 4)
+                neighboursCount++;
+
+            if (mapOfAutomaton[x, y_minus, z_minus] == 4)
+                neighboursCount++;
+            if (mapOfAutomaton[x, y_minus, z_plus] == 4)
+                neighboursCount++;
+            if (mapOfAutomaton[x, y_plus, z_minus] == 4)
+                neighboursCount++;
+            if (mapOfAutomaton[x, y_plus, z_plus] == 4)
+                neighboursCount++;
+
+            // Corners
+            if (mapOfAutomaton[x_minus, y_minus, z_minus] == 4)
+                neighboursCount++;
+            if (mapOfAutomaton[x_minus, y_minus, z_plus] == 4)
+                neighboursCount++;
+            if (mapOfAutomaton[x_minus, y_plus, z_minus] == 4)
+                neighboursCount++;
+            if (mapOfAutomaton[x_minus, y_plus, z_plus] == 4)
+                neighboursCount++;
+
+            if (mapOfAutomaton[x_plus, y_minus, z_minus] == 4)
+                neighboursCount++;
+            if (mapOfAutomaton[x_plus, y_minus, z_plus] == 4)
+                neighboursCount++;
+            if (mapOfAutomaton[x_plus, y_plus, z_minus] == 4)
+                neighboursCount++;
+            if (mapOfAutomaton[x_plus, y_plus, z_plus] == 4)
+                neighboursCount++;
+        }
+        return neighboursCount;
+    }
+
     private enum Neighbourhood
     {
         Moore,
@@ -322,7 +399,7 @@ public class WorldCellularAutomaton
             {
                 for (int k = 5; k < sizeZ; k++)
                 {
-                    if (rnd.Next() % 3 == 0)
+                    if (rnd.Next() % 2 == 0)
                     {
                         mapOfAutomatonCubes[i, j, k].MakeVisible();
                         mapOfAutomaton[i, j, k] = 4;
