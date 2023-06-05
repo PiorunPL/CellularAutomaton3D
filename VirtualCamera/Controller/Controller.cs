@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using MainProject.Domain.Basic;
 using MainProject.Domain.BSPTree;
 using MainProject.Domain.CameraRelated;
@@ -11,7 +12,7 @@ namespace MainProject.Controller;
 public class Controller
 {
     // private readonly WorldTriangles _world = new();
-    private readonly WorldCellularAutomaton _world = new(20, 20, 20);
+    private readonly WorldCellularAutomaton _world = new(24, 24, 24);
     private readonly Camera _camera = new Camera();
     private readonly List<Matrix4x4> _matrices = new List<Matrix4x4>();
     private readonly BSPTreeBuilder _bspTreeBuilder = new BSPTreeBuilder();
@@ -21,7 +22,7 @@ public class Controller
 
     public Controller()
     {
-        Node? tempNode = _bspTreeBuilder.GetBestBSPTree(_world.Triangles, 5);
+        Node? tempNode = _bspTreeBuilder.GetBestBSPTree(_world.Triangles, 2);
 
         if (tempNode == null)
             throw new ApplicationException();
@@ -39,6 +40,9 @@ public class Controller
 
     public SKBitmap CreatePhoto()
     {
+        // Stopwatch sw = new Stopwatch();
+        // sw.Start();
+        // Console.WriteLine(sw.ElapsedMilliseconds + " Start");
         if (_matrices.Count != 0)
         {
             Matrix4x4 resultMatrix = _matrices[0];
@@ -48,40 +52,54 @@ public class Controller
             }
 
             List<Point> points = _world.Points;
+            // option1
+            Parallel.ForEach(
+                points,
+                point =>
+                {
+                    calculateNewPoint(point, resultMatrix);
+                }
+            );
 
-            var chunks = points.Chunk(points.Count / _numberOfChunks + 1);
-            var pointsEnumerable = chunks.ToList();
+            //option2
+            // var chunks = points.Chunk(points.Count / _numberOfChunks + 1);
+            // var pointsEnumerable = chunks.ToList();
 
-            Task[] tasks = new Task[pointsEnumerable.Count];
+            // Task[] tasks = new Task[pointsEnumerable.Count];
 
-            for (int i = 0; i < pointsEnumerable.Count; i++)
-            {
-                var i1 = i;
-                tasks[i] = Task.Run((() => calculateNewPoints(pointsEnumerable[i1], resultMatrix)));
-            }
+            // for (int i = 0; i < pointsEnumerable.Count; i++)
+            // {
+            //     var i1 = i;
+            //     tasks[i] = Task.Run((() => calculateNewPoints(pointsEnumerable[i1], resultMatrix)));
+            // }
 
-            Task.WaitAll(tasks);
+            // Task.WaitAll(tasks);
 
             _matrices.Clear();
         }
-
+        // Console.WriteLine(sw.ElapsedMilliseconds + " Matricies");
         PainingAlgorithOrder PAO = new PainingAlgorithOrder();
         PAO.CreateTrianglesOrder(_BSPTreeRoot);
         var orderedTriangles = PAO.Order;
+        // Console.WriteLine(sw.ElapsedMilliseconds + " PAO Order");
 
         var chosenTriangles = TrianglesChooser.ChooseOnlyTrianglesAhead(orderedTriangles);
+        // Console.WriteLine(sw.ElapsedMilliseconds + " Chosen Triangles");
 
         _camera.PassActualWorld(chosenTriangles);
         var result = _camera.CreatePhotoTriangles();
+        // Console.WriteLine(sw.ElapsedMilliseconds + " CreatePhotoTriangles");
 
         _iterationTimeout--;
         if (_iterationTimeout <= 0)
         {
             _iterationTimeout = 10;
-            // _world.IterateWorld();
             _world.IterateWorldParallel();
         }
+        // Console.WriteLine(sw.ElapsedMilliseconds + " Stop");
+        // Console.WriteLine("---------------");
 
+        // sw.Stop();
         return result;
     }
 
@@ -93,6 +111,13 @@ public class Controller
             var newVector = Matrix4x4.Multiply(resultMatrix, vector);
             point.LoadCoordinatesFromVector(newVector);
         }
+    }
+
+    public void calculateNewPoint(Point point, Matrix4x4 resultMatrix)
+    {
+        var vector = point.GetVector();
+        var newVector = Matrix4x4.Multiply(resultMatrix, vector);
+        point.LoadCoordinatesFromVector(newVector);
     }
 
     public void ZoomIn(double t)
