@@ -9,7 +9,7 @@ public class Camera
     public ViewPort ViewPort = new ViewPort();
     // public List<Point2D> ViewPortPoints = new List<Point2D>();
     public List<Line> Lines = new List<Line>();
-    public List<Triangle> Triangles = new List<Triangle>();
+    public List<List<Triangle>> Triangles = new List<List<Triangle>>();
     public BitmapUtil BitmapUtil;
 
     public Camera()
@@ -33,7 +33,7 @@ public class Camera
         Lines.AddRange(lines);
     }
 
-    public void PassActualWorld(List<Triangle> triangles)
+    public void PassActualWorld(List<List<Triangle>> triangles)
     {
         Triangles.Clear();
         Triangles.AddRange(triangles);

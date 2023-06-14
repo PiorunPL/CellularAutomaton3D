@@ -4,28 +4,32 @@ namespace MainProject.Utility;
 
 public static class TrianglesChooser
 {
-    public static List<Triangle> ChooseOnlyTrianglesAhead(List<Triangle> triangles)
+    public static List<List<Triangle>> ChooseOnlyTrianglesAhead(List<List<Triangle>> triangles)
     {
-        List<Triangle> chosenTriangles = new();
-        List<Triangle> workingTriangles = triangles.ToList();
+        List<List<Triangle>> chosenTriangles = new();
+        List<List<Triangle>> workingTriangles = triangles.ToList();
 
         Triangle cameraPlane = CreateCameraPlane();
 
-        foreach (var currentTriangle in workingTriangles)
+        foreach (var currentTriangles in workingTriangles)
         {
-            int pointsOfTriangleAhead = GetNumberOfPointsOfTriangleInFrontOfCamera(currentTriangle);
+            var tempTriangles = new List<Triangle>();
+            
+            foreach (var triangle in currentTriangles)
+            {
+                int pointsOfTriangleAhead = GetNumberOfPointsOfTriangleInFrontOfCamera(triangle);
             
             if(pointsOfTriangleAhead == 3)
-                chosenTriangles.Add(currentTriangle);
+                tempTriangles.Add(triangle);
             else if (pointsOfTriangleAhead == 2)
             {
                 BSPTreeBuilder.TrianglePosition position =
-                    BSPTreeBuilder.CheckTrianglePosition(currentTriangle, cameraPlane);
+                    BSPTreeBuilder.CheckTrianglePosition(triangle, cameraPlane);
 
                 if (position == BSPTreeBuilder.TrianglePosition.ToDivideHard)
                 {
                     Point sideA1, sideA2, sideB1;
-                                    (sideA1, sideA2, sideB1) = BSPTreeBuilder.GetPreparedPointsForHardDivide(currentTriangle, cameraPlane);
+                                    (sideA1, sideA2, sideB1) = BSPTreeBuilder.GetPreparedPointsForHardDivide(triangle, cameraPlane);
                                     
                                     Point3D intersectionPoint1Position = BSPTreeBuilder.GetPoinfOfIntersection(sideA1.CurrentPosition, sideB1.CurrentPosition, cameraPlane);
                                     Point3D intersectionPoint1OriginalPosition =
@@ -38,27 +42,27 @@ public static class TrianglesChooser
                                     Point intersectionPoint2 = new Point(intersectionPoint2OriginalPosition, intersectionPoint2Position);
                                     
                                     Triangle t1 = new Triangle(sideA1, intersectionPoint1, intersectionPoint2);
-                                    t1.color = currentTriangle.color;
+                                    t1.color = triangle.color;
                                     
                                     Triangle t2 = new Triangle(sideA1, sideA2, intersectionPoint2);
-                                    t2.color = currentTriangle.color;
+                                    t2.color = triangle.color;
                                     
-                                    chosenTriangles.Add(t1);
-                                    chosenTriangles.Add(t2);
+                                    tempTriangles.Add(t1);
+                                    tempTriangles.Add(t2);
                 }
                 else
                 {
-                    chosenTriangles.Add(currentTriangle);
+                    tempTriangles.Add(triangle);
                 }
             }
             else if (pointsOfTriangleAhead == 1)
             {
                 BSPTreeBuilder.TrianglePosition position =
-                    BSPTreeBuilder.CheckTrianglePosition(currentTriangle, cameraPlane);
+                    BSPTreeBuilder.CheckTrianglePosition(triangle, cameraPlane);
                 if (position == BSPTreeBuilder.TrianglePosition.ToDivideEasy)
                 {
                     Point front, back, plane;
-                    (front, back, plane) = BSPTreeBuilder.GetPreparedPointsForEasyDivide(currentTriangle, cameraPlane);
+                    (front, back, plane) = BSPTreeBuilder.GetPreparedPointsForEasyDivide(triangle, cameraPlane);
 
                     Point3D intersectionPointPosition = BSPTreeBuilder.GetPoinfOfIntersection(front.CurrentPosition, back.CurrentPosition, cameraPlane);
                     Point3D intersectionPointOriginalPosition =
@@ -66,14 +70,14 @@ public static class TrianglesChooser
                     Point intersectionPoint = new Point(intersectionPointOriginalPosition, intersectionPointPosition);
 
                     Triangle t1 = new Triangle(front, plane, intersectionPoint);
-                    t1.color = currentTriangle.color;
+                    t1.color = triangle.color;
                     
-                    chosenTriangles.Add(t1);
+                    tempTriangles.Add(t1);
                 }
                 else
                 {
                     Point sideA1, sideA2, sideB1;
-                    (sideA1, sideA2, sideB1) = BSPTreeBuilder.GetPreparedPointsForHardDivide(currentTriangle, cameraPlane);
+                    (sideA1, sideA2, sideB1) = BSPTreeBuilder.GetPreparedPointsForHardDivide(triangle, cameraPlane);
 
                     Point3D intersectionPoint1Position = BSPTreeBuilder.GetPoinfOfIntersection(sideA1.CurrentPosition, sideB1.CurrentPosition, cameraPlane);
                     Point3D intersectionPoint1OriginalPosition =
@@ -86,11 +90,14 @@ public static class TrianglesChooser
                     Point intersectionPoint2 = new Point(intersectionPoint2OriginalPosition, intersectionPoint2Position);
 
                     Triangle t = new Triangle(intersectionPoint1, intersectionPoint2, sideB1);
-                    t.color = currentTriangle.color;
+                    t.color = triangle.color;
                     
-                    chosenTriangles.Add(t);
+                    tempTriangles.Add(t);
                 }
             } 
+            }
+            
+            chosenTriangles.Add(tempTriangles);
         }
 
         return chosenTriangles;

@@ -3,7 +3,7 @@ namespace MainProject.Domain.Basic;
 public class Cube
 {
     public List<Triangle> Triangles = new List<Triangle>();
-    private bool _isVisible = true;
+    private bool _isVisible = false;
 
     public void MakeVisible()
     {
@@ -13,7 +13,7 @@ public class Cube
         _isVisible = true;
         foreach (var triangle in Triangles)
         {
-            triangle.isVisible = true;
+            triangle.isVisible = !triangle.isVisible;
         }
     }
 
@@ -25,7 +25,7 @@ public class Cube
         _isVisible = false;
         foreach (var triangle in Triangles)
         {
-            triangle.isVisible = false;
+            triangle.isVisible = !triangle.isVisible;
         }
     }
 

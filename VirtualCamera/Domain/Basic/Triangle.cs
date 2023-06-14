@@ -8,7 +8,7 @@ public class Triangle
     public Vector Normal; //Currently not using, problem with Normal changing, while moving/rotating (camera coordinate system)
     public int[] color;
     public string position;
-    public bool isVisible = true;
+    public bool isVisible = false;
 
     public Triangle(Point p1, Point p2, Point p3)
     {

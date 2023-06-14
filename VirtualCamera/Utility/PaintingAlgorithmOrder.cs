@@ -5,7 +5,7 @@ namespace MainProject.Utility;
 
 public class PainingAlgorithOrder
 {
-    public List<Triangle> Order = new List<Triangle>();
+    public List<List<Triangle>> Order = new List<List<Triangle>>();
     public void CreateTrianglesOrder(Node? BSPTree)
     {
         if(BSPTree == null)
@@ -18,29 +18,13 @@ public class PainingAlgorithOrder
         if(position < 0)
         {
             CreateTrianglesOrder(BSPTree.Back);
-            if(BSPTree.Triangles != null)
-            {
-                foreach(Triangle tt in BSPTree.Triangles)
-                {
-                    if(tt.isVisible)
-                        Order.Add(tt);
-                    // Console.WriteLine(tt);
-                }
-            }
+            Order.Add(BSPTree.Triangles);
             CreateTrianglesOrder(BSPTree.Front);
         }
         else
         {
             CreateTrianglesOrder(BSPTree.Front);
-            if(BSPTree.Triangles != null)
-            {
-                foreach(Triangle tt in BSPTree.Triangles)
-                {
-                    if(tt.isVisible)
-                        Order.Add(tt);
-                    // Console.WriteLine(tt);
-                }
-            }
+            Order.Add(BSPTree.Triangles);
             CreateTrianglesOrder(BSPTree.Back);
         }
     }

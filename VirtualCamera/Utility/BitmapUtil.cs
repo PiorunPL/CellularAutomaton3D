@@ -46,7 +46,7 @@ public class BitmapUtil
         return bitmap;
     }
 
-    public SKBitmap GetBitmapFromTriangles(List<Triangle> triangles)
+    public SKBitmap GetBitmapFromTriangles(List<List<Triangle>> triangles)
     {
         SKBitmap bitmap = new SKBitmap(targetWidth, targetHeight, true);
         SKCanvas canvas = new SKCanvas(bitmap);
@@ -58,39 +58,44 @@ public class BitmapUtil
             StrokeWidth = 1
         };
         
-        foreach (var triangle in triangles)
+        foreach (var trianglesChunk in triangles)
         {
-            if(!triangle.isVisible)
-                continue;
+            Parallel.ForEach(trianglesChunk, triangle =>
+            {
+                if (!triangle.isVisible)
+                    return;
             
-            var normal = triangle.GetNormalVector();
-            var normalisedNormal = triangle.GetNormalisedNormalVector();
-            // Console.WriteLine(normalisedNormal);
+                // var normal = triangle.GetNormalVector();
+                // var normalisedNormal = triangle.GetNormalisedNormalVector();
+                // Console.WriteLine(normalisedNormal);
 
-            byte light = 5;
-            byte baselight = 0;
-            int red = triangle.color[0];
-            int green = triangle.color[1];
-            int blue = triangle.color[2];
+                byte light = 5;
+                byte baselight = 0;
+                int red = triangle.color[0];
+                int green = triangle.color[1];
+                int blue = triangle.color[2];
 
-            pathStroke.Color = new SKColor(
-                (byte)(red * light + baselight),
-                (byte)(green * light + baselight),
-                (byte)(blue * light + baselight));
+                pathStroke.Color = new SKColor(
+                    (byte)(red * light + baselight),
+                    (byte)(green * light + baselight),
+                    (byte)(blue * light + baselight));
 
-            (int x1, int y1) = triangle.P1.getPointCoordinatesBitmap(targetWidth, targetHeight, ViewPort.Z);
-            (int x2, int y2) = triangle.P2.getPointCoordinatesBitmap(targetWidth, targetHeight, ViewPort.Z);
-            (int x3, int y3) = triangle.P3.getPointCoordinatesBitmap(targetWidth, targetHeight, ViewPort.Z);
+                (int x1, int y1) = triangle.P1.getPointCoordinatesBitmap(targetWidth, targetHeight, ViewPort.Z);
+                (int x2, int y2) = triangle.P2.getPointCoordinatesBitmap(targetWidth, targetHeight, ViewPort.Z);
+                (int x3, int y3) = triangle.P3.getPointCoordinatesBitmap(targetWidth, targetHeight, ViewPort.Z);
 
 
-            var path = new SKPath { FillType = SKPathFillType.EvenOdd };
-            path.MoveTo(x1,y1);
-            path.LineTo(x2,y2);
-            path.LineTo(x3,y3);
-            path.LineTo(x1,y1);
-            path.Close();
+                var path = new SKPath { FillType = SKPathFillType.EvenOdd };
+                path.MoveTo(x1,y1);
+                path.LineTo(x2,y2);
+                path.LineTo(x3,y3);
+                path.LineTo(x1,y1);
+                path.Close();
             
-            canvas.DrawPath(path, pathStroke);
+                canvas.DrawPath(path, pathStroke);
+            });
+
+            
         }
         
         return bitmap;

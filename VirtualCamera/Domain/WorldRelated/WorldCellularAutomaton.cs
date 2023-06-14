@@ -75,22 +75,133 @@ public class WorldCellularAutomaton
             {
                 for (int k = 0; k < sizeZ; k++)
                 {
-                    Cube cube = CreateCube(
-                        tempPoints[i, j, k],
-                        tempPoints[i, j + 1, k],
-                        tempPoints[i + 1, j + 1, k],
-                        tempPoints[i + 1, j, k],
-                        tempPoints[i, j, k + 1],
-                        tempPoints[i, j + 1, k + 1],
-                        tempPoints[i + 1, j + 1, k + 1],
-                        tempPoints[i + 1, j, k + 1]
-                    );
+                    Cube cube = new Cube();
+                    // Cube cube = CreateCube(
+                    //     tempPoints[i, j, k],
+                    //     tempPoints[i, j + 1, k],
+                    //     tempPoints[i + 1, j + 1, k],
+                    //     tempPoints[i + 1, j, k],
+                    //     tempPoints[i, j, k + 1],
+                    //     tempPoints[i, j + 1, k + 1],
+                    //     tempPoints[i + 1, j + 1, k + 1],
+                    //     tempPoints[i + 1, j, k + 1]
+                    // );
                     Cubes.Add(cube);
                     cube.MakeInvisible();
                     mapOfAutomatonCubes[i, j, k] = cube;
                 }
             }
         }
+        
+        for (int i = 0; i < sizeX; i++)
+        {
+            for (int j = 0; j < sizeY; j++)
+            {
+                for (int k = 0; k < sizeZ; k++)
+                {
+                    //Sciana 1 - front
+                    Triangle t11 = new Triangle(tempPoints[i, j, k], tempPoints[i + 1, j, k], tempPoints[i, j + 1, k]);
+                    Triangle t12 = new Triangle(tempPoints[i + 1, j, k], tempPoints[i, j + 1, k], tempPoints[i + 1, j + 1, k]);
+                    Triangles.Add(t11);
+                    Triangles.Add(t12);
+                    mapOfAutomatonCubes[i,j,k].Triangles.Add(t11);
+                    mapOfAutomatonCubes[i,j,k].Triangles.Add(t12);
+                    if (k != 0)
+                    {
+                        mapOfAutomatonCubes[i,j,k-1].Triangles.Add(t11);
+                        mapOfAutomatonCubes[i,j,k-1].Triangles.Add(t12);
+                    }
+                    
+                    //Sciana 2 - left
+                    Triangle t21 = new Triangle(tempPoints[i, j, k], tempPoints[i, j, k + 1], tempPoints[i, j + 1, k]);
+                    Triangle t22 = new Triangle(tempPoints[i, j, k + 1], tempPoints[i, j + 1, k],
+                        tempPoints[i, j + 1, k + 1]);
+                    Triangles.Add(t21);
+                    Triangles.Add(t22);
+                    mapOfAutomatonCubes[i,j,k].Triangles.Add(t21);
+                    mapOfAutomatonCubes[i,j,k].Triangles.Add(t22);
+                    if (i != 0)
+                    {
+                        mapOfAutomatonCubes[i-1,j,k].Triangles.Add(t21);
+                        mapOfAutomatonCubes[i-1,j,k].Triangles.Add(t22);
+                    }
+                    
+                    //Sciana 3 - bottom
+                    Triangle t31 = new Triangle(tempPoints[i, j, k], tempPoints[i + 1, j, k], tempPoints[i, j, k + 1]);
+                    Triangle t32 = new Triangle(tempPoints[i + 1, j, k], tempPoints[i, j, k + 1],
+                        tempPoints[i + 1, j, k + 1]);
+                    Triangles.Add(t31);
+                    Triangles.Add(t32);
+                    mapOfAutomatonCubes[i,j,k].Triangles.Add(t31);
+                    mapOfAutomatonCubes[i,j,k].Triangles.Add(t32);
+                    if (j != 0)
+                    {
+                        mapOfAutomatonCubes[i,j-1,k].Triangles.Add(t31);
+                        mapOfAutomatonCubes[i,j-1,k].Triangles.Add(t32);
+                    }
+
+                    if (i == sizeX - 1)
+                    {
+                        //Sciana 4 = right
+                        Triangle t41 = new Triangle(tempPoints[i + 1, j, k], tempPoints[i + 1, j, k + 1],
+                            tempPoints[i + 1, j + 1, k]);
+                        Triangle t42 = new Triangle(tempPoints[i + 1, j + 1, k], tempPoints[i + 1, j, k + 1],
+                            tempPoints[i + 1, j + 1, k + 1]);
+                        Triangles.Add(t41);
+                        Triangles.Add(t42);
+                        mapOfAutomatonCubes[i,j,k].Triangles.Add(t41);
+                        mapOfAutomatonCubes[i,j,k].Triangles.Add(t42);
+                    }
+
+                    if (j == sizeY - 1)
+                    {   
+                        //Sciana 5 - top
+                        Triangle t51 = new Triangle(tempPoints[i, j + 1, k], tempPoints[i, j + 1, k + 1],
+                            tempPoints[i + 1, j + 1, k]);
+                        Triangle t52 = new Triangle(tempPoints[i, j + 1, k + 1], tempPoints[i + 1, j + 1, k],
+                            tempPoints[i + 1, j + 1, k + 1]);
+                        Triangles.Add(t51);
+                        Triangles.Add(t52);
+                        mapOfAutomatonCubes[i,j,k].Triangles.Add(t51);
+                        mapOfAutomatonCubes[i,j,k].Triangles.Add(t52);
+                    }
+
+                    if (k == sizeZ - 1)
+                    {
+                        //Sciana 6 - back
+                        Triangle t61 = new Triangle(tempPoints[i, j, k + 1], tempPoints[i, j + 1, k + 1],
+                            tempPoints[i + 1, j, k + 1]);
+                        Triangle t62 = new Triangle(tempPoints[i, j + 1, k + 1], tempPoints[i + 1, j, k + 1],
+                            tempPoints[i + 1, j + 1, k + 1]);
+                        Triangles.Add(t61);
+                        Triangles.Add(t62);
+                        mapOfAutomatonCubes[i,j,k].Triangles.Add(t61);
+                        mapOfAutomatonCubes[i,j,k].Triangles.Add(t62);
+                    }
+                }
+            }
+        }
+        
+        // for (int i = 0; i < sizeX; i++)
+        // {
+        //     for (int j = 0; j < sizeY; j++)
+        //     {
+        //         for (int k = 0; k < sizeZ; k++)
+        //         {
+        //             Cube cube = mapOfAutomatonCubes[i, j, k];
+        //             // cube.MakeInvisible();
+        //         }
+        //     }
+        // }
+    }
+
+    public bool isBorderPoint(int i, int j, int k)
+    {
+        if (i == 0 || j == 0 || k == 0)
+            return true;
+        if (i == sizeX || j == sizeY || k == sizeZ )
+            return true;
+        return false;
     }
 
     public void IterateWorld()
