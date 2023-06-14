@@ -1,3 +1,4 @@
+using System.Drawing;
 using MainProject.Domain.Basic;
 using MainProject.Domain.CameraRelated;
 using SkiaSharp;
@@ -11,6 +12,38 @@ public class BitmapUtil
     public int targetHeight = 1000;
 
     public ViewPort ViewPort;
+    
+    SKPaint pathStrokeColor1 = new SKPaint
+    {
+        IsAntialias = true,
+        Style = SKPaintStyle.StrokeAndFill,
+        StrokeWidth = 1,
+        Color =  new SKColor(255, 0, 0)
+    };
+        
+    SKPaint pathStrokeColor2 = new SKPaint
+    {
+        IsAntialias = true,
+        Style = SKPaintStyle.StrokeAndFill,
+        StrokeWidth = 1,
+        Color =  new SKColor(255, 85, 0)
+    };
+        
+    SKPaint pathStrokeColor3 = new SKPaint
+    {
+        IsAntialias = true,
+        Style = SKPaintStyle.StrokeAndFill,
+        StrokeWidth = 1,
+        Color =  new SKColor(255, 170, 0)
+    };
+        
+    SKPaint pathStrokeColor4 = new SKPaint
+    {
+        IsAntialias = true,
+        Style = SKPaintStyle.StrokeAndFill,
+        StrokeWidth = 1,
+        Color =  new SKColor(255, 255, 0)
+    };
 
     public BitmapUtil(ViewPort viewPort)
     {
@@ -51,20 +84,18 @@ public class BitmapUtil
         SKBitmap bitmap = new SKBitmap(targetWidth, targetHeight, true);
         SKCanvas canvas = new SKCanvas(bitmap);
         
-        var pathStroke = new SKPaint
-        {
-            IsAntialias = true,
-            Style = SKPaintStyle.StrokeAndFill,
-            StrokeWidth = 1
-        };
+        
+        
         
         foreach (var trianglesChunk in triangles)
         {
-            Parallel.ForEach(trianglesChunk, triangle =>
+            foreach(var triangle in trianglesChunk)
+            // var temp = Parallel.ForEach(trianglesChunk, triangle =>
             {
+
                 if (!triangle.isVisible)
-                    return;
-            
+                    continue;
+
                 // var normal = triangle.GetNormalVector();
                 // var normalisedNormal = triangle.GetNormalisedNormalVector();
                 // Console.WriteLine(normalisedNormal);
@@ -75,10 +106,16 @@ public class BitmapUtil
                 int green = triangle.color[1];
                 int blue = triangle.color[2];
 
-                pathStroke.Color = new SKColor(
-                    (byte)(red * light + baselight),
-                    (byte)(green * light + baselight),
-                    (byte)(blue * light + baselight));
+                SKPaint paint;
+                if (green == 255)
+                    paint = pathStrokeColor4;
+                else if (green == 170)
+                    paint = pathStrokeColor2;
+                else if (green == 85)
+                    paint = pathStrokeColor3;
+                else
+                    paint = pathStrokeColor1;
+
 
                 (int x1, int y1) = triangle.P1.getPointCoordinatesBitmap(targetWidth, targetHeight, ViewPort.Z);
                 (int x2, int y2) = triangle.P2.getPointCoordinatesBitmap(targetWidth, targetHeight, ViewPort.Z);
@@ -86,16 +123,22 @@ public class BitmapUtil
 
 
                 var path = new SKPath { FillType = SKPathFillType.EvenOdd };
-                path.MoveTo(x1,y1);
-                path.LineTo(x2,y2);
-                path.LineTo(x3,y3);
-                path.LineTo(x1,y1);
+                path.MoveTo(x1, y1);
+                path.LineTo(x2, y2);
+                path.LineTo(x3, y3);
+                path.LineTo(x1, y1);
                 path.Close();
-            
-                canvas.DrawPath(path, pathStroke);
-            });
+                
+                canvas.DrawPath(path, paint);
+            }
+            // );
 
-            
+            // if (!temp.IsCompleted)
+            // {
+            //     Console.WriteLine("NOT COMPLETED");
+            // }
+
+
         }
         
         return bitmap;

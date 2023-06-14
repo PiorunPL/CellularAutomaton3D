@@ -12,7 +12,7 @@ namespace MainProject.Controller;
 public class Controller
 {
     // private readonly WorldTriangles _world = new();
-    private readonly WorldCellularAutomaton _world = new(24, 24, 24);
+    private readonly WorldCellularAutomaton _world = new(30, 30, 30);
     private readonly Camera _camera = new Camera();
     private readonly List<Matrix4x4> _matrices = new List<Matrix4x4>();
     private readonly BSPTreeBuilder _bspTreeBuilder = new BSPTreeBuilder();
@@ -40,9 +40,6 @@ public class Controller
 
     public SKBitmap CreatePhoto()
     {
-        // Stopwatch sw = new Stopwatch();
-        // sw.Start();
-        // Console.WriteLine(sw.ElapsedMilliseconds + " Start");
         if (_matrices.Count != 0)
         {
             Matrix4x4 resultMatrix = _matrices[0];
@@ -88,13 +85,15 @@ public class Controller
 
         _camera.PassActualWorld(chosenTriangles);
         var result = _camera.CreatePhotoTriangles();
+        
+        
         // Console.WriteLine(sw.ElapsedMilliseconds + " CreatePhotoTriangles");
 
         _iterationTimeout--;
         if (_iterationTimeout <= 0)
         {
             _iterationTimeout = 10;
-            _world.IterateWorldParallel();
+            _world.IterateWorld();
         }
         // Console.WriteLine(sw.ElapsedMilliseconds + " Stop");
         // Console.WriteLine("---------------");

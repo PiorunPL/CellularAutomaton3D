@@ -206,20 +206,37 @@ public class WorldCellularAutomaton
 
     public void IterateWorld()
     {
+        // int[,,] tmpMap = new int[sizeX, sizeY, sizeZ];
+        // int[,] tmpLayer;
+        // for (int z = 0; z < sizeZ; z++)
+        // {
+        //     tmpLayer = IterateLayer(z);
+        //     for (int x = 0; x < sizeX; x++)
+        //     {
+        //         for (int y = 0; y < sizeY; y++)
+        //         {
+        //             tmpMap[x, y, z] = tmpLayer[x, y];
+        //         }
+        //     }
+        // }
+
         int[,,] tmpMap = new int[sizeX, sizeY, sizeZ];
-        int[,] tmpLayer;
-        for (int z = 0; z < sizeZ; z++)
-        {
-            tmpLayer = IterateLayer(z);
-            for (int x = 0; x < sizeX; x++)
+        Parallel.For(
+            0,
+            sizeZ,
+            z =>
             {
-                for (int y = 0; y < sizeY; y++)
+                var tmpLayer = IterateLayer(z);
+                for (int x = 0; x < sizeX; x++)
                 {
-                    tmpMap[x, y, z] = tmpLayer[x, y];
+                    for (int y = 0; y < sizeY; y++)
+                    {
+                        tmpMap[x, y, z] = tmpLayer[x, y];
+                    }
                 }
             }
-        }
-
+        );
+        
         for (int x = 0; x < sizeX; x++)
         {
             for (int y = 0; y < sizeY; y++)
