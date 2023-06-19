@@ -36,8 +36,8 @@ public class MainViewModel : ReactiveObject
         set => this.RaiseAndSetIfChanged(ref _image, value);
     }
 
-    private SKBitmap? _cameraViewImage;
-    private SKBitmap? CameraViewImage
+    private SKSurface? _cameraViewImage;
+    private SKSurface? CameraViewImage
     {
         get => _cameraViewImage;
         set => this.RaiseAndSetIfChanged(ref _cameraViewImage, value);
@@ -73,13 +73,13 @@ public class MainViewModel : ReactiveObject
         {
             SKImageInfo info = new SKImageInfo(
                 lockedBitmap.Size.Width,
-                lockedBitmap.Size.Height,
-                CameraViewImage.ColorType
+                lockedBitmap.Size.Height
+                // SKColorType.Rgba8888
             );
 
             _currentSurface = SKSurface.Create(info, lockedBitmap.Address, lockedBitmap.RowBytes);
             _currentSurface.Canvas.Clear(new SKColor(255, 255, 255));
-            _currentSurface.Canvas.DrawBitmap(CameraViewImage, 0, 0);
+            _currentSurface.Canvas.DrawSurface(CameraViewImage, 0, 0);
         }
     }
 

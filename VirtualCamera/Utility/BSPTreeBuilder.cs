@@ -62,14 +62,35 @@ public class BSPTreeBuilder
             );
         }
 
-        // node.Front = GenerateBSPTreeResursive(frontTriangles);
-        // node.Back = GenerateBSPTreeResursive(backTriangles);
-
-        var front = Task.Run(() => GenerateBSPTreeResursive(frontTriangles));
-        var back = Task.Run(() => GenerateBSPTreeResursive(backTriangles));
-        Task.WaitAll(front, back);
-        node.Front = front.Result;
-        node.Back = back.Result;
+        if (frontTriangles.Count > 2500 && backTriangles.Count > 2500)
+        {
+            var front = Task.Run(() => GenerateBSPTreeResursive(frontTriangles));
+            var back = Task.Run(() => GenerateBSPTreeResursive(backTriangles));
+            Task.WaitAll(front, back);
+            node.Front = front.Result;
+            node.Back = back.Result;
+        }
+        else if(frontTriangles.Count > 2500)
+        {
+            var front = Task.Run(() => GenerateBSPTreeResursive(frontTriangles));
+            node.Back = GenerateBSPTreeResursive(backTriangles);
+            Task.WaitAll(front);
+            node.Front = front.Result;
+            
+        }
+        else if (backTriangles.Count > 2500)
+        {
+            var back = Task.Run(() => GenerateBSPTreeResursive(backTriangles));
+            node.Front = GenerateBSPTreeResursive(frontTriangles); 
+            Task.WaitAll(back);
+            node.Back = back.Result;
+           
+        }
+        else
+        {
+            node.Front = GenerateBSPTreeResursive(frontTriangles); 
+            node.Back = GenerateBSPTreeResursive(backTriangles);
+        }
 
         return node;
     }

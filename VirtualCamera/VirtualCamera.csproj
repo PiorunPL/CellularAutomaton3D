@@ -5,18 +5,27 @@
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
         <RootNamespace>MainProject</RootNamespace>
+        <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     </PropertyGroup>
 
     <ItemGroup>
       <Reference Include="System.Drawing.Common">
         <HintPath>..\..\..\..\..\.nuget\packages\system.drawing.common\6.0.0\lib\net6.0\System.Drawing.Common.dll</HintPath>
       </Reference>
+      <Reference Include="System.Reactive">
+        <HintPath>..\..\..\..\..\.nuget\packages\system.reactive\5.0.0\lib\net5.0\System.Reactive.dll</HintPath>
+      </Reference>
     </ItemGroup>
 
     <ItemGroup>
       <PackageReference Include="Accord" Version="3.8.2-alpha" />
       <PackageReference Include="Accord.Math" Version="3.8.2-alpha" />
+      <PackageReference Include="OpenTK" Version="4.7.7" />
+      <PackageReference Include="OpenTK.GLControl" Version="3.3.3" />
+      <PackageReference Include="SkiaSharp.Extended" Version="2.0.0-preview.61" />
       <PackageReference Include="SkiaSharp.NativeAssets.Linux" Version="2.88.3" />
+      <PackageReference Include="SkiaSharp.Views" Version="2.88.3" />
+      <PackageReference Include="SkiaSharp.Views.Desktop.Common" Version="2.88.3" />
     </ItemGroup>
 
 </Project>

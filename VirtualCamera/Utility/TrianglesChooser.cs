@@ -17,6 +17,8 @@ public static class TrianglesChooser
             
             foreach (var triangle in currentTriangles)
             {
+                // if (!triangle.isVisible)
+                //     continue;
                 int pointsOfTriangleAhead = GetNumberOfPointsOfTriangleInFrontOfCamera(triangle);
             
             if(pointsOfTriangleAhead == 3)

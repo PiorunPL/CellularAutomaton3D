@@ -1,4 +1,7 @@
+using System.Collections.ObjectModel;
 using System.Diagnostics;
+using System.Reactive.Linq;
+using System.Runtime.CompilerServices;
 using MainProject.Domain.Basic;
 using MainProject.Domain.BSPTree;
 using MainProject.Domain.CameraRelated;
@@ -13,14 +16,24 @@ public class Controller
 {
     // private readonly WorldTriangles _world = new();
     private readonly WorldCellularAutomaton _world = new(30, 30, 30);
-    private readonly Camera _camera = new Camera();
+    private readonly Camera _camera;
     private readonly List<Matrix4x4> _matrices = new List<Matrix4x4>();
     private readonly BSPTreeBuilder _bspTreeBuilder = new BSPTreeBuilder();
     private readonly int _numberOfChunks = 50;
     private Node _BSPTreeRoot;
-    private int _iterationTimeout = 15;
+    // private int _iterationTimeout = 5;
+    private bool isMoved = true;
+    private List<List<Triangle>> chosenTriangles;
+    private SKCanvas Canvas;
+    private bool canBeNewIteration = true;
 
-    public Controller()
+    private IDisposable Observator;
+
+    private bool isCurrentlyDrawing = false;
+
+    // private Timer timer = new Timer((state => ));
+
+    public Controller(SKCanvas canvas)
     {
         Node? tempNode = _bspTreeBuilder.GetBestBSPTree(_world.Triangles, 2);
 
@@ -36,12 +49,28 @@ public class Controller
         {
             _world.Triangles.Remove(triangle);
         }
+
+        Canvas = canvas;
+        _camera = new Camera(Canvas);
+        Observator = Observable.Interval(TimeSpan.FromMilliseconds(50)).Do(_ => canBeNewIteration = true).Subscribe();
     }
 
-    public SKBitmap CreatePhoto()
+    public void CreatePhoto()
     {
+        if (isCurrentlyDrawing)
+        {
+            Console.WriteLine("Multiple Drawings!");
+            return;
+        }
+
+        isCurrentlyDrawing = true;
+        
+        var watch = new Stopwatch();
+        watch.Start();
+        
         if (_matrices.Count != 0)
         {
+            isMoved = true;
             Matrix4x4 resultMatrix = _matrices[0];
             for (int i = 1; i < _matrices.Count; i++)
             {
@@ -74,32 +103,46 @@ public class Controller
 
             _matrices.Clear();
         }
+        Console.WriteLine("After Points: " +  watch.ElapsedMilliseconds);
         // Console.WriteLine(sw.ElapsedMilliseconds + " Matricies");
-        PainingAlgorithOrder PAO = new PainingAlgorithOrder();
-        PAO.CreateTrianglesOrder(_BSPTreeRoot);
-        var orderedTriangles = PAO.Order;
-        // Console.WriteLine(sw.ElapsedMilliseconds + " PAO Order");
+        if (isMoved)
+        {
+            PainingAlgorithOrder PAO = new PainingAlgorithOrder();
+            PAO.CreateTrianglesOrder(_BSPTreeRoot);
+            Console.WriteLine("PAO.CreateTrianglesOrder: " +  watch.ElapsedMilliseconds);
+            var orderedTriangles = PAO.Order;
+            Console.WriteLine("PAO.Order: " +  watch.ElapsedMilliseconds);
+            // Console.WriteLine(sw.ElapsedMilliseconds + " PAO Order");
 
-        var chosenTriangles = TrianglesChooser.ChooseOnlyTrianglesAhead(orderedTriangles);
+            chosenTriangles = TrianglesChooser.ChooseOnlyTrianglesAhead(orderedTriangles);
+            isMoved = false;
+        }
+       
+        Console.WriteLine("Chosen Triangles: " +  watch.ElapsedMilliseconds);
         // Console.WriteLine(sw.ElapsedMilliseconds + " Chosen Triangles");
 
         _camera.PassActualWorld(chosenTriangles);
-        var result = _camera.CreatePhotoTriangles();
+        Console.WriteLine("PassActualWorld: " +  watch.ElapsedMilliseconds);
+        _camera.CreatePhotoTriangles();
+        Console.WriteLine("CreatePhotoTriangles: " +  watch.ElapsedMilliseconds);
         
         
         // Console.WriteLine(sw.ElapsedMilliseconds + " CreatePhotoTriangles");
 
-        _iterationTimeout--;
-        if (_iterationTimeout <= 0)
+        // _iterationTimeout--;
+        if (canBeNewIteration)
         {
-            _iterationTimeout = 10;
+            canBeNewIteration = false;
             _world.IterateWorld();
         }
+        Console.WriteLine("After Iteration: " +  watch.ElapsedMilliseconds);
         // Console.WriteLine(sw.ElapsedMilliseconds + " Stop");
         // Console.WriteLine("---------------");
 
         // sw.Stop();
-        return result;
+        watch.Stop();
+
+        isCurrentlyDrawing = false;
     }
 
     public void calculateNewPoints(Point[] points, Matrix4x4 resultMatrix)
