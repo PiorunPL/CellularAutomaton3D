@@ -13,8 +13,8 @@ https://github.com/PiorunPL/CellularAutomaton3D/assets/28514155/47993705-9154-4f
 ## Technologia
 Projekt został napisany w języku C# z użyciem biblioteki AvaloniaUI tworzącej okno aplikacji.
 
-## Sposób wykonania
-Scena złożona jest ze sklejonych ze soba sześcianów (Domyślnie 30x30x30 sześcianów - możliwa zmiana wielkości świata w kodzie)
+## Przedstawiona scena
+Scena złożona jest ze sklejonych ze soba sześcianów (Domyślnie 30x30x30 sześcianów - możliwa zmiana wielkości świata w kodzie). 
 
 
 ## Sterowanie 
