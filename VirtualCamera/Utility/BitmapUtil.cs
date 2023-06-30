@@ -83,6 +83,8 @@ public class BitmapUtil
     {
         SKBitmap bitmap = new SKBitmap(targetWidth, targetHeight, true);
         SKCanvas canvas = new SKCanvas(bitmap);
+
+        var z = ViewPort.Z;
         
         
         
@@ -117,9 +119,9 @@ public class BitmapUtil
                     paint = pathStrokeColor1;
 
 
-                (int x1, int y1) = triangle.P1.getPointCoordinatesBitmap(targetWidth, targetHeight, ViewPort.Z);
-                (int x2, int y2) = triangle.P2.getPointCoordinatesBitmap(targetWidth, targetHeight, ViewPort.Z);
-                (int x3, int y3) = triangle.P3.getPointCoordinatesBitmap(targetWidth, targetHeight, ViewPort.Z);
+                (int x1, int y1) = triangle.P1.getPointCoordinatesBitmap(targetWidth, targetHeight, z);
+                (int x2, int y2) = triangle.P2.getPointCoordinatesBitmap(targetWidth, targetHeight, z);
+                (int x3, int y3) = triangle.P3.getPointCoordinatesBitmap(targetWidth, targetHeight, z);
 
 
                 var path = new SKPath { FillType = SKPathFillType.EvenOdd };
