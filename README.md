@@ -14,7 +14,7 @@ https://github.com/PiorunPL/CellularAutomaton3D/assets/28514155/47993705-9154-4f
 Projekt został napisany w języku C# z użyciem biblioteki AvaloniaUI tworzącej okno aplikacji.
 
 ## Przedstawiona scena
-Scena złożona jest ze sklejonych ze soba sześcianów (Domyślnie 30x30x30 sześcianów - możliwa zmiana wielkości świata w kodzie). 
+Scena złożona jest ze sklejonych ze soba sześcianów (Domyślnie 30x30x30 sześcianów - możliwa zmiana wielkości świata w kodzie). Sam świat ma formę "Torusa" tj. przeciwległe ściany są "połączone". Przykładowe przejście Glidera w prawą ścianę spowoduje jego wyjście z lewej ściany. 
 
 
 ## Sterowanie 
