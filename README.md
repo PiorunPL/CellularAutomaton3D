@@ -5,7 +5,10 @@ Tematem projektu jest utworzenie trójwymiarowego automatu komórkowego, wokół
 
 ## Demonostracja działania
 Demonostracja została utworzona dla świata o wymiarach 35x35x35 sześcianów.
-![Demo](Media/2023-06-29%2022-18-21.mp4)
+
+https://github.com/PiorunPL/CellularAutomaton3D/assets/28514155/47993705-9154-4f92-8331-ec481c3ae00f
+
+
 
 ## Technologia
 Projekt został napisany w języku C# z użyciem biblioteki AvaloniaUI tworzącej okno aplikacji.
